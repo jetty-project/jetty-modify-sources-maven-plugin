@@ -51,6 +51,10 @@ public class RemoveLogEnabledStatement
     public void execute()
         throws MojoExecutionException
     {
+        if (project.getPackaging().equals( "pom" ))
+        {
+            return;
+        }
         try
         {
 
@@ -97,7 +101,6 @@ public class RemoveLogEnabledStatement
 
             Files.createDirectories( out );
             sourceRoot.saveAll( out );
-            project.getBuild().setSourceDirectory( outputDirectory.toString() );
         }
         catch ( IOException e )
         {
