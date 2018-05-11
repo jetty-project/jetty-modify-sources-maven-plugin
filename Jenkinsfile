@@ -18,8 +18,10 @@ node("linux") {
 
   try
   {
-    withMaven(maven:mvnName,jdk:jdkName,globalMavenSettingsConfig: settingsName) {
-      sh "mvn -B -V clean install -P run-its"
+    stage('Build') {
+      withMaven( maven: mvnName, jdk: jdkName, globalMavenSettingsConfig: settingsName ) {
+        sh "mvn -B -V clean install -P run-its"
+      }
     }
   } catch(Exception e) {
     //notifyBuild("Build Failure")
@@ -30,8 +32,10 @@ node("linux") {
   {
     if ( isActiveBranch() )
     {
-      withMaven(maven:mvnName,jdk:jdkName,globalMavenSettingsConfig: settingsName) {
-        sh "mvn -B -V deploy"
+      stage ('Deploy') {
+        withMaven( maven: mvnName, jdk: jdkName, globalMavenSettingsConfig: settingsName ) {
+          sh "mvn -B -V deploy"
+        }
       }
     }
   } catch(Exception e) {
