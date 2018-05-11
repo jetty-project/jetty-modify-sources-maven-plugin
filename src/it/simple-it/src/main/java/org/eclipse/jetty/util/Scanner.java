@@ -544,6 +544,7 @@ public class Scanner // extends AbstractLifeCycle
      */
     private void scanFile (File f, Map<String,TimeNSize> scanInfoMap, int depth)
     {
+        Log.getLogger(Scanner.class).debug("scanFile {}",f);
         try
         {
             if (!f.exists())

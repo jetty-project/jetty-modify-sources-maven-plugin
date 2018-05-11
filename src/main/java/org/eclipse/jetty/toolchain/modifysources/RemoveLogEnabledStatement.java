@@ -3,6 +3,7 @@ package org.eclipse.jetty.toolchain.modifysources;
 
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
@@ -97,21 +98,24 @@ public class RemoveLogEnabledStatement
                             }
                             return super.visit( n, arg );
                         }
-                        // TODO configurable option
-                        //                    @Override
-                        //                    public Visitable visit( ExpressionStmt n, Void arg )
-                        //                    {
-                        //                        if(n.getExpression().toString().contains( ".warn(") //
-                        //                            || n.getExpression().toString().contains( ".info(") //
-                        //                            || n.getExpression().toString().contains( ".ignore("))
-                        //                        {
-                        //                            n.remove();
-                        //                            return null;
-                        //                        } else
-                        //                        {
-                        //                            return super.visit( n, arg );
-                        //                        }
-                        //                    }
+
+                        //TODO configurable option
+                        @Override
+                        public Visitable visit( ExpressionStmt n, Void arg )
+                        {
+                            if ( n.getExpression().toString().contains( ".debug(" ))
+//                            if ( n.getExpression().toString().contains( ".warn(" ) //
+//                                || n.getExpression().toString().contains( ".info(" ) //
+//                                || n.getExpression().toString().contains( ".ignore(" ) )
+                            {
+                                n.remove();
+                                return null;
+                            }
+                            else
+                            {
+                                return super.visit( n, arg );
+                            }
+                        }
                     }, null ) );
 
             Files.createDirectories( out );

@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -56,6 +57,8 @@ public class RemoveLogEnabledStatementTest
 
         String sourceModified = new String( Files.readAllBytes( modified ) );
         assertTrue( sourceModified.contains( "package org.eclipse.jetty.util;" ) );
+        assertFalse( sourceModified.contains( "isDebugEnabled("));
+        assertFalse( sourceModified.contains( ".debug("));
     }
 
 }

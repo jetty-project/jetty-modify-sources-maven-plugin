@@ -547,6 +547,7 @@ public class Scanner extends AbstractLifeCycle
     {
         try
         {
+            org.eclipse.jetty.util.log.Log.getLogger(Scanner.class).debug("scanFile {}",f);
             if (!f.exists())
                 return;
 
