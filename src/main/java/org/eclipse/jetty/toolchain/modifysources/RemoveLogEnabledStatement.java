@@ -109,12 +109,9 @@ public class RemoveLogEnabledStatement
 //                                || n.getExpression().toString().contains( ".ignore(" ) )
                             {
                                 n.remove();
-                                return null;
+                                //return null;
                             }
-                            else
-                            {
-                                return super.visit( n, arg );
-                            }
+                            return super.visit( n, arg );
                         }
                     }, null ) );
 
