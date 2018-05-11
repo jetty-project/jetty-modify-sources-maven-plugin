@@ -11,18 +11,16 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <src.dir>${project.build.directory}/foo</src.dir>
   </properties>
 
   <build>
-    <sourceDirectory>${project.build.directory}/modified-sources</sourceDirectory>
+    <sourceDirectory>${src.dir}</sourceDirectory>
     <pluginManagement>
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.7.0</version>
-          <configuration>
-
-          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -43,4 +41,12 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>remove-is-debug</id>
+      <properties>
+        <src.dir>${project.build.directory}/modified-sources</src.dir>
+      </properties>
+    </profile>
+  </profiles>
 </project>

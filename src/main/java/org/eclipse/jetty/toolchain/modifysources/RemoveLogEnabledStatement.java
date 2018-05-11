@@ -97,7 +97,7 @@ public class RemoveLogEnabledStatement
 
             Files.createDirectories( out );
             sourceRoot.saveAll( out );
-
+            project.getBuild().setSourceDirectory( outputDirectory.toString() );
         }
         catch ( IOException e )
         {
