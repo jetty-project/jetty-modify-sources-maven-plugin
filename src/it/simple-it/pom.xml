@@ -21,10 +21,10 @@
         <version>@project.version@</version>
         <executions>
           <execution>
-            <id>touch</id>
-            <phase>validate</phase>
+            <id>remove-is-debug</id>
+            <phase>generate-sources</phase>
             <goals>
-              <goal>touch</goal>
+              <goal>remove-log-enabled</goal>
             </goals>
           </execution>
         </executions>

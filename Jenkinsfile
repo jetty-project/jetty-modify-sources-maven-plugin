@@ -1,13 +1,10 @@
 #!groovy
 
 node("linux") {
-  // System Dependent Locations
-  def mvntool = tool name: 'maven3', type: 'hudson.tasks.Maven$MavenInstallation'
-  def jdktool = tool name: 'jdk8', type: 'hudson.model.JDK'
 
-  // Environment
-  List mvnEnv = ["PATH+MVN=${mvntool}/bin", "PATH+JDK=${jdktool}/bin", "JAVA_HOME=${jdktool}/", "MAVEN_HOME=${mvntool}"]
-  mvnEnv.add("MAVEN_OPTS=-Xms256m -Xmx1024m -Djava.awt.headless=true")
+  def settingsName = 'oss-settings.xml'
+  def mvnName = 'maven3.5'
+  def jdkName = 'jdk8'
 
   try
   {
@@ -21,7 +18,7 @@ node("linux") {
 
   try
   {
-    withMaven(maven:'maven3',jdk:'jdk8') {
+    withMaven(maven:mvnName,jdk:jdkName,globalMavenSettingsConfig: settingsName) {
       sh "mvn -B -V clean install -P run-its"
     }
   } catch(Exception e) {
@@ -33,7 +30,7 @@ node("linux") {
   {
     if ( isActiveBranch() )
     {
-      withMaven(maven:'maven3',jdk:'jdk8') {
+      withMaven(maven:mvnName,jdk:jdkName,globalMavenSettingsConfig: settingsName) {
         sh "mvn -B -V deploy"
       }
     }
