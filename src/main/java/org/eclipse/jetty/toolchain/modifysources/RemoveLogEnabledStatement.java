@@ -53,6 +53,12 @@ public class RemoveLogEnabledStatement
     {
         if (project.getPackaging().equals( "pom" ))
         {
+            getLog().debug( "remove log enabled statement skip pom packaging" );
+            return;
+        }
+        if(!sourcesLocation.exists())
+        {
+            getLog().debug( "remove log enabled statement sources location not exists" );
             return;
         }
         try
