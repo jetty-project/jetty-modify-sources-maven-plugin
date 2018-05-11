@@ -41,6 +41,9 @@ public class RemoveLogEnabledStatement
     @Parameter( defaultValue = "${project.build.directory}/modified-sources", property = "outputLocation", required = true )
     private File outputDirectory;
 
+    @Parameter( property = "modifysources.jetty.skip" )
+    private boolean skip;
+
     /**
      * Maven Project.
      */
@@ -51,6 +54,11 @@ public class RemoveLogEnabledStatement
     public void execute()
         throws MojoExecutionException
     {
+        if(skip)
+        {
+            getLog().debug( "remove log enabled statement sources skip" );
+            return;
+        }
         if (project.getPackaging().equals( "pom" ))
         {
             getLog().debug( "remove log enabled statement skip pom packaging" );
@@ -61,6 +69,7 @@ public class RemoveLogEnabledStatement
             getLog().debug( "remove log enabled statement sources location not exists" );
             return;
         }
+
         try
         {
 
