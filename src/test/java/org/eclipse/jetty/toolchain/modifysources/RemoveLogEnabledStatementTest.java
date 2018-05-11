@@ -34,7 +34,7 @@ public class RemoveLogEnabledStatementTest
      * @throws Exception if any
      */
     @Test
-    public void testSomething()
+    public void test_remove()
         throws Exception
     {
         File pom = new File( "target/test-classes/project-to-test/" );
@@ -54,6 +54,8 @@ public class RemoveLogEnabledStatementTest
 
         assertTrue( Files.exists(modified) );
 
+        String sourceModified = new String( Files.readAllBytes( modified ) );
+        assertTrue( sourceModified.contains( "package org.eclipse.jetty.util;" ) );
     }
 
 }

@@ -53,10 +53,17 @@ public class RemoveLogEnabledStatement
     {
         try
         {
+
             SourceRoot sourceRoot = new SourceRoot( sourcesLocation.toPath() );
 
             // Our sample is in the root of this directory, so no package name.
             List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse( "" );
+
+            Path out = outputDirectory.toPath();
+            if ( Files.exists( out ) )
+            {
+                Files.walk( out ).sorted( Comparator.reverseOrder() ).map( Path::toFile ).forEach( File::delete );
+            }
 
             parseResults.stream().forEach(
                 compilationUnitParseResult -> compilationUnitParseResult.getResult().get().accept(
@@ -88,14 +95,9 @@ public class RemoveLogEnabledStatement
                         //                    }
                     }, null ) );
 
-            Path out = outputDirectory.toPath();
-            if ( Files.exists( out ) )
-            {
-                Files.walk( out ).sorted( Comparator.reverseOrder() ).map( Path::toFile ).forEach( File::delete );
-            }
-
             Files.createDirectories( out );
             sourceRoot.saveAll( out );
+
         }
         catch ( IOException e )
         {

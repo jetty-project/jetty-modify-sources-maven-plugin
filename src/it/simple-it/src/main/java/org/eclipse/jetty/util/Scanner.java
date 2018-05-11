@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.eclipse.jetty.util.component.AbstractLifeCycle;
+//import org.eclipse.jetty.util.component.AbstractLifeCycle;
 
 
 /**
@@ -44,7 +44,7 @@ import org.eclipse.jetty.util.component.AbstractLifeCycle;
  * files and reporting these events via registered Listeners.
  *
  */
-public class Scanner extends AbstractLifeCycle
+public class Scanner // extends AbstractLifeCycle
 {
     private static int __scannerId=0;
     private int _scanInterval;
@@ -295,7 +295,7 @@ public class Scanner extends AbstractLifeCycle
     /**
      * Start the scanning action.
      */
-    @Override
+    //@Override
     public synchronized void doStart()
     {
         if (_running)
@@ -351,7 +351,6 @@ public class Scanner extends AbstractLifeCycle
     /**
      * Stop the scanning.
      */
-    @Override
     public synchronized void doStop()
     {
         if (_running)
@@ -496,7 +495,7 @@ public class Scanner extends AbstractLifeCycle
             }
         }
 
-        if (org.eclipse.jetty.util.log.Log.getLogger(Scanner.class).isDebugEnabled()) org.eclipse.jetty.util.log.Log.getLogger(Scanner.class).debug("scanned "+_scanDirs+": "+_notifications);
+        if (Log.getLogger(Scanner.class).isDebugEnabled()) Log.getLogger(Scanner.class).debug("scanned "+_scanDirs+": "+_notifications);
 
         // Process notifications
         // Only process notifications that are for stable files (ie same in old and current scan).
@@ -554,16 +553,16 @@ public class Scanner extends AbstractLifeCycle
             {
                 if ((_filter == null) || ((_filter != null) && _filter.accept(f.getParentFile(), f.getName())))
                 {
-                    if (org.eclipse.jetty.util.log.Log.getLogger(Scanner.class).isDebugEnabled())
-                        org.eclipse.jetty.util.log.Log.getLogger(Scanner.class).debug("scan accepted {}",f);
+                    if (Log.getLogger(Scanner.class).isDebugEnabled())
+                        Log.getLogger(Scanner.class).debug("scan accepted {}",f);
                     String name = f.getCanonicalPath();
                     scanInfoMap.put(name, new TimeNSize(f.lastModified(),f.isDirectory()?0:f.length()));
                 }
                 else
                 {
-                    if (org.eclipse.jetty.util.log.Log.getLogger(Scanner.class).isDebugEnabled())
+                    if (Log.getLogger(Scanner.class).isDebugEnabled())
                     {
-                        org.eclipse.jetty.util.log.Log.getLogger( Scanner.class ).debug( "scan rejected {}", f );
+                        Log.getLogger( Scanner.class ).debug( "scan rejected {}", f );
                     }
                 }
             }
@@ -578,7 +577,7 @@ public class Scanner extends AbstractLifeCycle
                         scanFile(files[i], scanInfoMap,depth+1);
                 }
                 //else
-                //.warn("Error listing files in directory {}", f);
+                    //.warn("Error listing files in directory {}", f);
             }
         }
         catch (IOException e)

@@ -14,6 +14,18 @@
   </properties>
 
   <build>
+    <sourceDirectory>${project.build.directory}/modified-sources</sourceDirectory>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.7.0</version>
+          <configuration>
+
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>@project.groupId@</groupId>

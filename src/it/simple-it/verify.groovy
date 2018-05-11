@@ -1,3 +1,6 @@
-File touchFile = new File( basedir, "target/touch.txt" );
+File source = new File( basedir, "target/modified-sources/org/eclipse/jetty/util/Scanner.java" );
 
-assert touchFile.isFile()
+assert source.isFile()
+
+
+assert !source.text.contains( 'isDebugEnabled' )
