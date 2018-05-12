@@ -1,6 +1,7 @@
 package org.eclipse.jetty.toolchain.modifysources;
 
 
+import com.github.javaparser.utils.SourceRoot;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,9 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class RemoveLogEnabledStatementTest
 {
@@ -38,6 +37,7 @@ public class RemoveLogEnabledStatementTest
     public void test_remove()
         throws Exception
     {
+
         File pom = new File( "target/test-classes/project-to-test/" );
         assertNotNull( pom );
         assertTrue( pom.exists() );
@@ -53,12 +53,21 @@ public class RemoveLogEnabledStatementTest
 
         Path modified = Paths.get( outputDirectory.toString(), "org", "jetty", "Scanner.java" );
 
-        assertTrue( Files.exists(modified) );
+        assertTrue( Files.exists( modified ) );
 
         String sourceModified = new String( Files.readAllBytes( modified ) );
         assertTrue( sourceModified.contains( "package org.eclipse.jetty.util;" ) );
-        assertFalse( sourceModified.contains( "isDebugEnabled("));
-        assertFalse( sourceModified.contains( ".debug("));
+        assertFalse( sourceModified.contains( "isDebugEnabled(" ) );
+        assertFalse( "source modified contains .debug:" + sourceModified, sourceModified.contains( ".debug(" ) );
+
+        modified = Paths.get( outputDirectory.toString(), "org", "jetty", "HazelcastSessionDataStore.java" );
+
+        sourceModified = new String( Files.readAllBytes( modified ) );
+        //System.out.println( "sourceModified:" + sourceModified );
+
+        assertTrue( sourceModified.contains( "package org.eclipse.jetty.hazelcast.session;" ) );
+        assertFalse( sourceModified.contains( "isDebugEnabled(" ) );
+        assertFalse( "source modified contains .debug:" + sourceModified, sourceModified.contains( ".debug(" ) );
     }
 
 }

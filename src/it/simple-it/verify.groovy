@@ -4,4 +4,4 @@ assert !source.text.contains( 'isDebugEnabled' )
 assert !source.text.contains( '.debug')
 
 File buildLog = new File( basedir, 'build.log' )
-assert buildLog.text.contains( 'Compiling 1 source file' )
+assert buildLog.text.contains( 'Compiling 2 source files' )

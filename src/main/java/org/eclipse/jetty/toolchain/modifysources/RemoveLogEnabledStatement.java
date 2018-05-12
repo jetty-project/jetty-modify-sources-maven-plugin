@@ -2,7 +2,10 @@ package org.eclipse.jetty.toolchain.modifysources;
 
 
 import com.github.javaparser.ParseResult;
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
@@ -75,6 +78,8 @@ public class RemoveLogEnabledStatement
         {
 
             SourceRoot sourceRoot = new SourceRoot( sourcesLocation.toPath() );
+            sourceRoot.getParserConfiguration().setLanguageLevel( ParserConfiguration.LanguageLevel.JAVA_9 );
+            //sourceRoot.
 
             // Our sample is in the root of this directory, so no package name.
             List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse( "" );
@@ -95,21 +100,25 @@ public class RemoveLogEnabledStatement
                             if ( n.getCondition().toString().endsWith( "isDebugEnabled()" ) )
                             {
                                 n.remove();
+                                return null;
                             }
                             return super.visit( n, arg );
                         }
 
                         //TODO configurable option
                         @Override
-                        public Visitable visit( ExpressionStmt n, Void arg )
+                        public Visitable visit( MethodCallExpr n, Void arg )
                         {
-                            if ( n.getExpression().toString().contains( ".debug(" ))
-//                            if ( n.getExpression().toString().contains( ".warn(" ) //
-//                                || n.getExpression().toString().contains( ".info(" ) //
-//                                || n.getExpression().toString().contains( ".ignore(" ) )
+                            // LOG.debug(.....) case
+                            List<Node> childs = n.getChildNodes();
+                            if ( !childs.isEmpty() && childs.size() >= 3 //
+                                && ( "LOG".equals( childs.get( 0 ).toString())
+                                || childs.get( 0 ).toString().contains( "Log.getLogger" )) //
+                                && "debug".equals( childs.get( 1 ).toString()))
                             {
+                                //getLog().debug( "contains .debug(" );
                                 n.remove();
-                                //return null;
+                                return null;
                             }
                             return super.visit( n, arg );
                         }

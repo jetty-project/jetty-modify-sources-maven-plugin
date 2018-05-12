@@ -685,11 +685,11 @@ public class Scanner // extends AbstractLifeCycle
             }
             catch (Exception e)
             {
-                warn(l,filenames.toString(),e);
+                //warn(l,filenames.toString(),e);
             }
             catch (Error e)
             {
-                warn(l,filenames.toString(),e);
+                //warn(l,filenames.toString(),e);
             }
         }
     }
