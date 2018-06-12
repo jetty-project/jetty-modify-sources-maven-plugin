@@ -8,6 +8,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.utils.SourceRoot;
@@ -103,7 +104,14 @@ public class RemoveLogEnabledStatement
                             {
                                 if(n.getElseStmt().isPresent())
                                 {
-                                    n.getParentNode().get().replace( n, n.getElseStmt().get().asBlockStmt() );
+                                    Statement statement = n.getElseStmt().get();
+                                    if (statement.isBlockStmt())
+                                    {
+                                        n.getParentNode().get().replace( n, statement.asBlockStmt() );
+                                    } else
+                                    {
+                                        n.getParentNode().get().replace( n, statement);
+                                    }
                                 } else {
                                     n.remove();
                                 }
