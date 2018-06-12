@@ -18,9 +18,14 @@ node("linux") {
 
   try
   {
+    def mvnGoals = "clean install"
+    if ( isActiveBranch() )
+    {
+      mvnGoals = "clean deploy"
+    }
     stage('Build') {
       withMaven( maven: mvnName, jdk: jdkName, globalMavenSettingsConfig: settingsName ) {
-        sh "mvn -B -V clean install -P run-its"
+        sh "mvn -B -V $mvnGoals -P run-its"
       }
     }
   } catch(Exception e) {
@@ -28,19 +33,6 @@ node("linux") {
     throw e
   }
 
-  try
-  {
-    if ( isActiveBranch() )
-    {
-      stage ('Deploy') {
-        withMaven( maven: mvnName, jdk: jdkName, globalMavenSettingsConfig: settingsName ) {
-          sh "mvn -B -V deploy"
-        }
-      }
-    }
-  } catch(Exception e) {
-    throw e;
-  }
 
 }
 
