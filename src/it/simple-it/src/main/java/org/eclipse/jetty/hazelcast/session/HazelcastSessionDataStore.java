@@ -27,6 +27,7 @@ import org.eclipse.jetty.server.session.UnreadableSessionDataException;
 import org.eclipse.jetty.util.annotation.ManagedObject;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
+import java.io.File;
 
 import java.util.Collections;
 import java.util.Set;
@@ -106,6 +107,13 @@ public class HazelcastSessionDataStore
     public void initialize( SessionContext context )
         throws Exception
     {
+        File f;
+        if (LOG.isDebugEnabled())
+        {
+            f = new File("foo");
+        } else {
+            f = new File("beer");
+        }
         _context = context;
     }
 

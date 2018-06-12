@@ -94,12 +94,19 @@ public class RemoveLogEnabledStatement
                 compilationUnitParseResult -> compilationUnitParseResult.getResult().get().accept(
                     new ModifierVisitor<Void>()
                     {
+
+
                         @Override
                         public Visitable visit( IfStmt n, Void arg )
                         {
                             if ( n.getCondition().toString().endsWith( "isDebugEnabled()" ) )
                             {
-                                n.remove();
+                                if(n.getElseStmt().isPresent())
+                                {
+                                    n.getParentNode().get().replace( n, n.getElseStmt().get().asBlockStmt() );
+                                } else {
+                                    n.remove();
+                                }
                                 return null;
                             }
                             return super.visit( n, arg );
@@ -122,6 +129,7 @@ public class RemoveLogEnabledStatement
                             }
                             return super.visit( n, arg );
                         }
+
                     }, null ) );
 
             Files.createDirectories( out );

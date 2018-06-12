@@ -568,6 +568,14 @@ public class Scanner // extends AbstractLifeCycle
                 }
             }
 
+            File afile;
+            if (Log.getLogger(Scanner.class).isDebugEnabled())
+            {
+                afile = new File("if");
+            } else {
+                afile = new File("else");
+            }
+
             // If it is a directory, scan if it is a known directory or the depth is OK.
             if (f.isDirectory() && (depth<_scanDepth || _scanDepth==-1 || _scanDirs.contains(f)))
             {
