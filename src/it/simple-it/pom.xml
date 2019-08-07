@@ -13,7 +13,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <src.dir>${project.build.directory}/foo</src.dir>
     <hazelcast.version>3.9.3</hazelcast.version>
-    <jetty.version>9.4.10.v20180503</jetty.version>
+    <jetty.version>9.4.19.v20190610</jetty.version>
   </properties>
 
   <build>
