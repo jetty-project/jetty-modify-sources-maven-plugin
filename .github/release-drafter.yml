@@ -1,0 +1,2 @@
+_extends: .github
+tag-template: jetty-modify-sources-maven-plugin-$NEXT_PATCH_VERSION
