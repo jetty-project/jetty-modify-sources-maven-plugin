@@ -1,84 +1,67 @@
 #!groovy
 
-node("linux") {
-
-  def settingsName = 'oss-settings.xml'
-  def mvnName = 'maven3.5'
-  def jdkName = 'jdk8'
-
-  try
-  {
-    stage('Checkout') {
-      checkout scm
-    }
-  } catch (Exception e) {
-    //notifyBuild("Checkout Failure")
-    throw e
+pipeline {
+  agent any
+  options {
+    disableConcurrentBuilds()
+    durabilityHint('PERFORMANCE_OPTIMIZED')
+    buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '5'))
+    timeout(time: 120, unit: 'MINUTES')
   }
-
-  try
-  {
-    def mvnGoals = "clean install"
-    if ( isActiveBranch() )
-    {
-      mvnGoals = "clean deploy"
-    }
-    stage('Build') {
-      withMaven( maven: mvnName, jdk: jdkName, globalMavenSettingsConfig: settingsName ) {
-        sh "mvn -B -V $mvnGoals -P run-its"
+  stages {
+    stage( "Parallel Stage" ) {
+      parallel {
+        stage( "Build / Test - JDK11" ) {
+          agent { node { label 'linux' } }
+          options { timeout( time: 120, unit: 'MINUTES' ) }
+          steps {
+            mavenBuild( "jdk11", "clean install javadoc:jar" )
+            warnings consoleParsers: [[parserName: 'Maven'], [parserName: 'Java']]
+            script {
+              if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'apache-9' || env.BRANCH_NAME == 'apache-8') {
+                mavenBuild( "jdk11", "deploy" )
+              }
+            }
+          }
+        }
+        stage( "Build / Test - JDK17" ) {
+          agent { node { label 'linux' } }
+          options { timeout( time: 120, unit: 'MINUTES' ) }
+          steps {
+            mavenBuild( "jdk17", "clean install javadoc:jar" )
+          }
+        }
       }
     }
-  } catch(Exception e) {
-    //notifyBuild("Build Failure")
-    throw e
   }
-
-
 }
 
-// True if this build is part of the "active" branches
-// for Jetty.
-def isActiveBranch()
-{
-  def branchName = "${env.BRANCH_NAME}"
-  return ( branchName == "master" );
-}
+/**
+ * To other developers, if you are using this method above, please use the following syntax.
+ *
+ * mavenBuild("<jdk>", "<profiles> <goals> <plugins> <properties>"
+ *
+ * @param jdk the jdk tool name (in jenkins) to use for this build
+ * @param cmdline the command line in "<profiles> <goals> <properties>"`format.
+ * @return the Jenkinsfile step representing a maven build
+ */
+def mavenBuild(jdk, cmdline) {
+  def mvnName = 'maven3'
+  def localRepo = "${env.JENKINS_HOME}/${env.EXECUTOR_NUMBER}" // ".repository" //
+  def settingsName = 'oss-settings.xml'
+  def mavenOpts = '-Xms2g -Xmx2g -Djava.awt.headless=true'
 
-// Test if the Jenkins Pipeline or Step has marked the
-// current build as unstable
-def isUnstable()
-{
-  return currentBuild.result == "UNSTABLE"
-}
-
-// Send a notification about the build status
-def notifyBuild(String buildStatus)
-{
-  if ( !isActiveBranch() )
-  {
-    // don't send notifications on transient branches
-    return
+  withMaven(
+          maven: mvnName,
+          jdk: "$jdk",
+          publisherStrategy: 'EXPLICIT',
+          globalMavenSettingsConfig: settingsName,
+          options: [junitPublisher(disabled: false)],
+          mavenOpts: mavenOpts,
+          mavenLocalRepo: localRepo) {
+    // Some common Maven command line + provided command line
+    sh "mvn -V -B -DfailIfNoTests=false -Djetty.testtracker.log=true -e $cmdline"
   }
-
-  // default the value
-  buildStatus = buildStatus ?: "UNKNOWN"
-
-  def email = "${env.EMAILADDRESS}"
-  def summary = "${env.JOB_NAME}#${env.BUILD_NUMBER} - ${buildStatus}"
-  def detail = """<h4>Job: <a href='${env.JOB_URL}'>${env.JOB_NAME}</a> [#${env.BUILD_NUMBER}]</h4>
-  <p><b>${buildStatus}</b></p>
-  <table>
-    <tr><td>Build</td><td><a href='${env.BUILD_URL}'>${env.BUILD_URL}</a></td><tr>
-    <tr><td>Console</td><td><a href='${env.BUILD_URL}console'>${env.BUILD_URL}console</a></td><tr>
-    <tr><td>Test Report</td><td><a href='${env.BUILD_URL}testReport/'>${env.BUILD_URL}testReport/</a></td><tr>
-  </table>
-  """
-
-  emailext (
-    to: email,
-    subject: summary,
-    body: detail
-  )
 }
 
 // vim: et:ts=2:sw=2:ft=groovy
