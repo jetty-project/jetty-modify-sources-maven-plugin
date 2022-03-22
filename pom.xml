@@ -13,7 +13,7 @@
   <name>jetty-modify-sources-maven-plugin Maven Plugin</name>
 
   <prerequisites>
-    <maven>${maven.version}</maven>
+    <maven>3.8.2</maven>
   </prerequisites>
 
   <organization>

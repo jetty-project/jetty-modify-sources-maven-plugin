@@ -53,7 +53,7 @@ public class HazelcastSessionDataStore
     }
 
     @Override
-    public SessionData load( String id )
+    public SessionData doLoad( String id )
         throws Exception
     {
 
