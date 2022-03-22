@@ -4,6 +4,10 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    ignore:
+      # Restrict updates to jetty in the 9.4.x branch
+      - dependency-name: "org.eclipse.jetty:*"
+        versions: [ "<=10" ]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
