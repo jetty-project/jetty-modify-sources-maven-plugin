@@ -18,7 +18,7 @@ pipeline {
             mavenBuild( "jdk11", "clean install javadoc:jar" )
             warnings consoleParsers: [[parserName: 'Maven'], [parserName: 'Java']]
             script {
-              if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'apache-9' || env.BRANCH_NAME == 'apache-8') {
+              if (env.BRANCH_NAME == 'master') {
                 mavenBuild( "jdk11", "deploy" )
               }
             }
