@@ -623,6 +623,12 @@ public class Scanner extends AbstractLifeCycle
         }
     }
 
+    /**
+     * Check if there is a jakarta.servlet.annotation.ServletSecurity
+     * annotation on the servlet class. If there is, then we force
+     * it to be loaded on startup, because all of the security
+     * constraints must be calculated as the container starts.
+     */
     private void warn(Object listener,String filename,Throwable th)
     {
         //.warn(listener+" failed on '"+filename, th);
@@ -634,6 +640,13 @@ public class Scanner extends AbstractLifeCycle
      */
     private void reportAddition (String filename)
     {
+
+        if (!jakarta.servlet.Filter.class.isAssignableFrom(getHeldClass())) {
+            String msg = getHeldClass() + " is not a jakarta.servlet.Filter";
+            doStop();
+            throw new IllegalStateException(msg);
+        }
+
         Iterator<Listener> itor = _listeners.iterator();
         while (itor.hasNext())
         {
@@ -652,6 +665,10 @@ public class Scanner extends AbstractLifeCycle
                 warn(l,filename,e);
             }
         }
+
+        if ((getHeldClass().getAnnotation(jakarta.servlet.annotation.ServletSecurity.class) != null) && !_initOnStartup)
+            setInitOrder(Integer.MAX_VALUE);
+
     }
 
 

@@ -8,13 +8,18 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.expr.CastExpr;
+import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.MethodReferenceExpr;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.TextBlockLiteralExpr;
 import com.github.javaparser.ast.expr.TypeExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.modules.ModuleDeclaration;
@@ -28,6 +33,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithType;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.utils.SourceRoot;
@@ -165,25 +171,10 @@ public class ModifyEE9ToEE8
                             return super.visit(n, arg);
                         }
 
-                        @Override
-                        public Visitable visit(NameExpr n, Void arg) {
-
-                            return super.visit(n, arg);
-                        }
-
-                        @Override
-                        public Visitable visit(ExpressionStmt n, Void arg) {
-                            return super.visit(n, arg);
-                        }
-
-                        @Override
-                        public Visitable visit(FieldAccessExpr n, Void arg) {
-                            return super.visit(n, arg);
-                        }
 
                         @Override
                         public Visitable visit(MethodCallExpr n, Void arg) {
-                            if(StringUtils.startsWith(n.toString(), "org.eclipse.jetty.ee9") && n.getScope().isPresent()) {
+                            if(StringUtils.startsWith(n.toString(), "org.eclipse.jetty.ee9.") && n.getScope().isPresent()) {
                                 // org.eclipse.jetty.ee9.nested.Response.unwrap(event.getSuppliedResponse())
                                 String fullString = n.toString();
                                 Expression expression = n.getScope().get();
@@ -204,12 +195,24 @@ public class ModifyEE9ToEE8
                         }
 
                         @Override
-                        public Visitable visit(CastExpr n, Void arg) {
+                        public Visitable visit(ClassExpr n, Void arg) {
                             changeEE9TypeToEE8(n);
                             return super.visit(n, arg);
                         }
 
+                        @Override
+                        public Visitable visit(StringLiteralExpr n, Void arg) {
+                            if(StringUtils.contains(n.getValue(), "jakarta.servlet")) {
+                                n.setString(StringUtils.replace(n.getValue(), "jakarta.servlet", "javax.servlet"));
+                            }
+                            return super.visit(n, arg);
+                        }
 
+                        @Override
+                        public Visitable visit(CastExpr n, Void arg) {
+                            changeEE9TypeToEE8(n);
+                            return super.visit(n, arg);
+                        }
 
                         @Override
                         public Visitable visit(ModuleDeclaration n, Void arg) {
@@ -248,8 +251,14 @@ public class ModifyEE9ToEE8
                         }
 
                         @Override
-                        public Visitable visit(CompilationUnit cu, Void arg) {
-                            return super.visit(cu, arg);
+                        public Visitable visit(JavadocComment n, Void arg) {
+
+                            if (StringUtils.contains(n.getContent(), "jakarta.servlet")) {
+                                n.setContent(StringUtils.replace(n.getContent(),"jakarta.servlet", "javax.servlet"));
+                            }
+
+
+                            return super.visit(n, arg);
                         }
                     }, null );
 
