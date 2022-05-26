@@ -85,7 +85,7 @@ public class ModifyEE9ToEE8
     /**
      * Maven Project.
      */
-    @Component
+    @Parameter( defaultValue = "${project}", readonly = true )
     protected MavenProject project;
 
 

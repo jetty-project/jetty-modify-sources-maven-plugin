@@ -52,7 +52,7 @@ public class RemoveLogEnabledStatement
     /**
      * Maven Project.
      */
-    @Component
+    @Parameter( defaultValue = "${project}", readonly = true )
     protected MavenProject project;
 
 
