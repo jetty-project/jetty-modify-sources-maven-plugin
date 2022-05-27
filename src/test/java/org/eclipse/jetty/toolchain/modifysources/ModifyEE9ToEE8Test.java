@@ -59,9 +59,10 @@ public class ModifyEE9ToEE8Test
         assertTrue(Files.exists(modified));
 
         String sourceModified = new String( Files.readAllBytes( modified ) );
-        assertTrue(sourceModified.contains( "package org.eclipse.jetty.ee8.nested;"));
-        assertFalse(sourceModified.contains( "package org.eclipse.jetty.ee9.nested;"));
-        assertFalse(sourceModified.contains( "jakarta.servlet"));
+        assertTrue(sourceModified.contains("package org.eclipse.jetty.ee8.nested;"));
+        assertFalse(sourceModified.contains("package org.eclipse.jetty.ee9.nested;"));
+        assertFalse(sourceModified.contains("jakarta.servlet"));
+        assertFalse(sourceModified.contains("org.eclipse.jetty.ee9"));
         assertTrue(
                 sourceModified.contains("protected void handleOptions(Request request, org.eclipse.jetty.ee8.nested.Response response) throws IOException"));
         assertTrue(

@@ -1,14 +1,14 @@
 package org.eclipse.jetty.toolchain.modifysources;
 
 
+import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.expr.CastExpr;
@@ -16,11 +16,8 @@ import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.MethodReferenceExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.ast.expr.TextBlockLiteralExpr;
-import com.github.javaparser.ast.expr.TypeExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.modules.ModuleDeclaration;
 import com.github.javaparser.ast.modules.ModuleExportsDirective;
@@ -30,19 +27,14 @@ import com.github.javaparser.ast.modules.ModuleRequiresDirective;
 import com.github.javaparser.ast.modules.ModuleUsesDirective;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithType;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.IfStmt;
-import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.ast.type.TypeParameter;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.utils.SourceRoot;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -139,7 +131,6 @@ public class ModifyEE9ToEE8
 
                         @Override
                         public Node visit(ImportDeclaration n, Void arg) {
-                            String currentName = n.getNameAsString();
                             changeEE9NameToEE8(n);
                             return super.visit(n, arg);
                         }
@@ -185,7 +176,9 @@ public class ModifyEE9ToEE8
                                     // org.eclipse.jetty.ee9.nested
                                     String ee9PackageName = StringUtils.substringBefore(fullString, "." + classSimpleName);
                                     // org.eclipse.jetty.ee8.nested
-                                    String ee8PackageName = "org.eclipse.jetty.ee8." + ee9PackageName.substring("org.eclipse.jetty.ee9.".length());
+                                    String ee8PackageName = StringUtils.replace(ee9PackageName,
+                                            "org.eclipse.jetty.ee9",
+                                            "org.eclipse.jetty.ee8");
                                     NameExpr nameExpr = new NameExpr(ee8PackageName + "." + classSimpleName);
                                     n.setScope(nameExpr);
                                 }
@@ -204,6 +197,9 @@ public class ModifyEE9ToEE8
                         public Visitable visit(StringLiteralExpr n, Void arg) {
                             if(StringUtils.contains(n.getValue(), "jakarta.servlet")) {
                                 n.setString(StringUtils.replace(n.getValue(), "jakarta.servlet", "javax.servlet"));
+                            }
+                            if(StringUtils.contains(n.getValue(), "org.eclipse.jetty.ee9")) {
+                                n.setString(StringUtils.replace(n.getValue(), "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8"));
                             }
                             return super.visit(n, arg);
                         }
@@ -256,8 +252,34 @@ public class ModifyEE9ToEE8
                             if (StringUtils.contains(n.getContent(), "jakarta.servlet")) {
                                 n.setContent(StringUtils.replace(n.getContent(),"jakarta.servlet", "javax.servlet"));
                             }
+                            return super.visit(n, arg);
+                        }
 
+                        @Override
+                        public Visitable visit(ClassOrInterfaceDeclaration n, Void arg) {
+                            return super.visit(n, arg);
+                        }
 
+                        @Override
+                        public Visitable visit(ClassOrInterfaceType n, Void arg) {
+                            String currentName = n.toString();
+                            JavaParser javaParser = new JavaParser();
+
+                            if (currentName.startsWith("org.eclipse.jetty.ee9.")) {
+                                String newName = StringUtils.replace(currentName, "org.eclipse.jetty.ee9.", "org.eclipse.jetty.ee8.");
+                                ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
+                                if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
+                                    n = parseResult.getResult().get();
+                                }
+
+                            }
+                            if (currentName.startsWith("jakarta.servlet.")) {
+                                String newName = StringUtils.replace(currentName, "jakarta.servlet.", "javax.servlet.");
+                                ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
+                                if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
+                                    n = parseResult.getResult().get();
+                                }
+                            }
                             return super.visit(n, arg);
                         }
                     }, null );
@@ -294,11 +316,11 @@ public class ModifyEE9ToEE8
         //org.eclipse.jetty.ee9.nested to org.eclipse.jetty.ee8.nested
         String currentName = n.getName().asString();
         if (currentName.startsWith("org.eclipse.jetty.ee9.")) {
-            String newName = "org.eclipse.jetty.ee8." + currentName.substring("org.eclipse.jetty.ee9.".length());
+            String newName = StringUtils.replace(currentName, "org.eclipse.jetty.ee9.", "org.eclipse.jetty.ee8.");
             n.setName(newName);
         }
         if (currentName.startsWith("jakarta.servlet.")) {
-            String newName = "javax.servlet." + currentName.substring("jakarta.servlet.".length());
+            String newName = StringUtils.replace(currentName, "jakarta.servlet.", "javax.servlet.");
             n.setName(newName);
         }
     }
@@ -307,11 +329,11 @@ public class ModifyEE9ToEE8
         //org.eclipse.jetty.ee9.nested to org.eclipse.jetty.ee8.nested
         String currentType =n.getTypeAsString();
         if (currentType.startsWith("org.eclipse.jetty.ee9.")) {
-            String newType = "org.eclipse.jetty.ee8." + currentType.substring("org.eclipse.jetty.ee9.".length());
+            String newType = StringUtils.replace(currentType, "org.eclipse.jetty.ee9.", "org.eclipse.jetty.ee8.");
             n.setType(newType);
         }
         if (currentType.startsWith("jakarta.servlet.")) {
-            String newType = "javax.servlet." + currentType.substring("jakarta.servlet.".length());
+            String newType = StringUtils.replace(currentType, "jakarta.servlet.", "javax.servlet.");
             n.setType(newType);
         }
     }

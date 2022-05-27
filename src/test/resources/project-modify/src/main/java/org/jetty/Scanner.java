@@ -61,6 +61,8 @@ import jakarta.servlet.http.HttpSessionListener;
 
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 
 /**
  * Scanner
@@ -69,7 +71,7 @@ import org.eclipse.jetty.util.component.AbstractLifeCycle;
  * files and reporting these events via registered Listeners.
  *
  */
-public class Scanner extends AbstractLifeCycle
+public class Scanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
 {
     private static int __scannerId=0;
     private int _scanInterval;
@@ -602,6 +604,12 @@ public class Scanner extends AbstractLifeCycle
             } else {
                 f = new File("beer");
             }
+
+            assertThat(events, Matchers.contains(
+                    "Decorate class org.eclipse.jetty.ee9.servlet.ServletLifeCycleTest$TestListener2",
+                    "Decorate class org.eclipse.jetty.ee9.servlet.ServletLifeCycleTest$TestFilter2",
+                    "Decorate class jakarta.servlet.ServletLifeCycleTest$TestListener2",
+                    "Decorate class org.eclipse.jetty.ee9.servlet.ServletLifeCycleTest$TestServlet3"));
 
 
             // If it is a directory, scan if it is a known directory or the depth is OK.
