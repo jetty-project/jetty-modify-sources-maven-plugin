@@ -88,6 +88,8 @@ public class Scanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
     private TimerTask _task;
     private int _scanDepth=0;
 
+    public static final String WEB_DEFAULTS_XML = "org/eclipse/jetty/ee9/webapp/webdefault-ee9.xml";
+
     public enum Notification { ADDED, CHANGED, REMOVED };
     private final Map<String,Notification> _notifications = new HashMap<String,Notification>();
 

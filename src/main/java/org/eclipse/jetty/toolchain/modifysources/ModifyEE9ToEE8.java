@@ -201,6 +201,10 @@ public class ModifyEE9ToEE8
                             if(StringUtils.contains(n.getValue(), "org.eclipse.jetty.ee9")) {
                                 n.setString(StringUtils.replace(n.getValue(), "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8"));
                             }
+                            if(StringUtils.contains(n.getValue(), "org/eclipse/jetty/ee9")) {
+                                n.setString(StringUtils.replace(n.getValue(), "org/eclipse/jetty/ee9", "org/eclipse/jetty/ee8"));
+                            }
+
                             return super.visit(n, arg);
                         }
 
