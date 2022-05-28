@@ -198,6 +198,9 @@ public class ModifyEE9ToEE8
                             if(StringUtils.contains(n.getValue(), "jakarta.servlet")) {
                                 n.setString(StringUtils.replace(n.getValue(), "jakarta.servlet", "javax.servlet"));
                             }
+                            if(StringUtils.contains(n.getValue(), "jakarta/servlet")) {
+                                n.setString(StringUtils.replace(n.getValue(), "jakarta/servlet", "javax/servlet"));
+                            }
                             if(StringUtils.contains(n.getValue(), "org.eclipse.jetty.ee9")) {
                                 n.setString(StringUtils.replace(n.getValue(), "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8"));
                             }

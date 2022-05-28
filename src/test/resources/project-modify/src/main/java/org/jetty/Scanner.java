@@ -90,6 +90,8 @@ public class Scanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
 
     public static final String WEB_DEFAULTS_XML = "org/eclipse/jetty/ee9/webapp/webdefault-ee9.xml";
 
+    public static final String DEFAULT = "jakarta/servlet/foo/bar/beer.xml";
+
     public enum Notification { ADDED, CHANGED, REMOVED };
     private final Map<String,Notification> _notifications = new HashMap<String,Notification>();
 
