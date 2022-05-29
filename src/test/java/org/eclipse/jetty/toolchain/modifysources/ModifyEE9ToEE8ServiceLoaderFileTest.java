@@ -55,10 +55,39 @@ public class ModifyEE9ToEE8ServiceLoaderFileTest
         assertTrue( outputDirectory.exists() );
 
         Path modified = Paths.get(outputDirectory.toString(), "META-INF", "services", "org.eclipse.jetty.ee9.webapp.Configuration");
+        assertFalse(Files.exists(modified));
+
+        modified = Paths.get(outputDirectory.toString(), "META-INF", "services", "org.eclipse.jetty.ee8.webapp.Configuration");
         assertTrue(Files.exists(modified));
 
         String modifiedContent = new String(Files.readAllBytes(modified));
         assertFalse(modifiedContent.contains("org.eclipse.jetty.ee9"));
+
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.FragmentConfiguration"));
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.JettyWebXmlConfiguration"));
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.JaasConfiguration"));
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.JaspiConfiguration"));
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.JmxConfiguration"));
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.JndiConfiguration"));
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.JspConfiguration"));
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.MetaInfConfiguration"));
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.ServletsConfiguration"));
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.WebAppConfiguration"));
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.WebInfConfiguration"));
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.WebXmlConfiguration"));
+
+
+        modified = Paths.get(outputDirectory.toString(), "META-INF", "services", "jakarta.servlet.ServletContainerInitializer");
+        assertFalse(Files.exists(modified));
+
+        modified = Paths.get(outputDirectory.toString(), "META-INF", "services", "javax.servlet.ServletContainerInitializer");
+        assertTrue(Files.exists(modified));
+
+        modifiedContent = new String(Files.readAllBytes(modified));
+        assertFalse(modifiedContent.contains("org.eclipse.jetty.ee9"));
+
+        assertFalse(modifiedContent.contains("org.eclipse.jetty.ee9.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer"));
+        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer"));
 
 
     }

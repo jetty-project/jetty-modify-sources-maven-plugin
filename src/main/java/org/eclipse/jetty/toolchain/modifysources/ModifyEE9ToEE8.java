@@ -2,6 +2,7 @@ package org.eclipse.jetty.toolchain.modifysources;
 
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
@@ -322,27 +323,38 @@ public class ModifyEE9ToEE8
     private static void changeEE9NameToEE8(NodeWithName n) {
         //org.eclipse.jetty.ee9.nested to org.eclipse.jetty.ee8.nested
         String currentName = n.getName().asString();
-        if (currentName.startsWith("org.eclipse.jetty.ee9.")) {
-            String newName = StringUtils.replace(currentName, "org.eclipse.jetty.ee9.", "org.eclipse.jetty.ee8.");
-            n.setName(newName);
-        }
-        if (currentName.startsWith("jakarta.servlet.")) {
-            String newName = StringUtils.replace(currentName, "jakarta.servlet.", "javax.servlet.");
+        String newName = changeEE9TypeToEE8(currentName);
+        if(newName != null) {
             n.setName(newName);
         }
     }
 
     private static void changeEE9TypeToEE8(NodeWithType n) {
         //org.eclipse.jetty.ee9.nested to org.eclipse.jetty.ee8.nested
-        String currentType =n.getTypeAsString();
-        if (currentType.startsWith("org.eclipse.jetty.ee9.")) {
-            String newType = StringUtils.replace(currentType, "org.eclipse.jetty.ee9.", "org.eclipse.jetty.ee8.");
+        String currentType = n.getTypeAsString();
+        String newType = changeEE9TypeToEE8(currentType);
+        if (newType != null ) {
             n.setType(newType);
         }
-        if (currentType.startsWith("jakarta.servlet.")) {
-            String newType = StringUtils.replace(currentType, "jakarta.servlet.", "javax.servlet.");
-            n.setType(newType);
+    }
+
+    /**
+     *
+     * @param currentType
+     * @return will return <code>null</code> if there is nothing to change
+     */
+    public static String changeEE9TypeToEE8(String currentType) {
+        //org.eclipse.jetty.ee9.nested to org.eclipse.jetty.ee8.nested
+        if (currentType.startsWith("org.eclipse.jetty.ee9")) {
+            String newType = StringUtils.replace(currentType, "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8");
+            return newType;
         }
+        if (currentType.startsWith("jakarta.servlet")) {
+            String newType = StringUtils.replace(currentType, "jakarta.servlet", "javax.servlet");
+            return newType;
+        }
+
+        return null;
     }
 
 
