@@ -62,6 +62,7 @@ public class ModifyEE9ToEE8Test
         assertTrue(sourceModified.contains("package org.eclipse.jetty.ee8.nested;"));
         assertFalse(sourceModified.contains("package org.eclipse.jetty.ee9.nested;"));
         assertFalse(sourceModified.contains("org/eclipse/jetty/ee9"));
+        assertFalse(sourceModified.contains("webdefault-ee9.xml"));
         assertFalse(sourceModified.contains("jakarta/servlet"));
         assertFalse(sourceModified.contains("jakarta.servlet"));
         assertFalse(sourceModified.contains("org.eclipse.jetty.ee9"));

@@ -208,6 +208,9 @@ public class ModifyEE9ToEE8
                             if(StringUtils.contains(n.getValue(), "org/eclipse/jetty/ee9")) {
                                 n.setString(StringUtils.replace(n.getValue(), "org/eclipse/jetty/ee9", "org/eclipse/jetty/ee8"));
                             }
+                            if(StringUtils.contains(n.getValue(), "webdefault-ee9.xml")) {
+                                n.setString(StringUtils.replace(n.getValue(), "webdefault-ee9.xml", "webdefault-ee8.xml"));
+                            }
 
                             return super.visit(n, arg);
                         }
