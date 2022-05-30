@@ -64,7 +64,9 @@ public class ModifyEE9ToEE8Test
         assertFalse(sourceModified.contains("org/eclipse/jetty/ee9"));
         assertFalse(sourceModified.contains("webdefault-ee9.xml"));
         assertFalse(sourceModified.contains("jakarta/servlet"));
+        assertFalse(sourceModified.contains("jakarta/websocket"));
         assertFalse(sourceModified.contains("jakarta.servlet"));
+        assertFalse(sourceModified.contains("jakarta.websocket"));
         assertFalse(sourceModified.contains("org.eclipse.jetty.ee9"));
         assertTrue(
                 sourceModified.contains("protected void handleOptions(Request request, org.eclipse.jetty.ee8.nested.Response response) throws IOException"));
@@ -72,6 +74,8 @@ public class ModifyEE9ToEE8Test
                 sourceModified.contains("final org.eclipse.jetty.ee8.nested.Response response = channel.getResponse();"));
         assertTrue(
                 sourceModified.contains("import javax.servlet.ServletRequestEvent;"));
+        assertTrue(
+                sourceModified.contains("import javax.websocket.ContainerProvider;"));
         assertTrue(
                 sourceModified.contains("final HttpServletResponse response = org.eclipse.jetty.ee8.nested.Response.unwrap(event.getSuppliedResponse());"));
 

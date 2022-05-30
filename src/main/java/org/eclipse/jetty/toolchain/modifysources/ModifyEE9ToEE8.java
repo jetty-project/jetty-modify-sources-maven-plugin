@@ -196,11 +196,11 @@ public class ModifyEE9ToEE8
 
                         @Override
                         public Visitable visit(StringLiteralExpr n, Void arg) {
-                            if(StringUtils.contains(n.getValue(), "jakarta.servlet")) {
-                                n.setString(StringUtils.replace(n.getValue(), "jakarta.servlet", "javax.servlet"));
+                            if(StringUtils.contains(n.getValue(), "jakarta.")) {
+                                n.setString(StringUtils.replace(n.getValue(), "jakarta.", "javax."));
                             }
-                            if(StringUtils.contains(n.getValue(), "jakarta/servlet")) {
-                                n.setString(StringUtils.replace(n.getValue(), "jakarta/servlet", "javax/servlet"));
+                            if(StringUtils.contains(n.getValue(), "jakarta/")) {
+                                n.setString(StringUtils.replace(n.getValue(), "jakarta/", "javax/"));
                             }
                             if(StringUtils.contains(n.getValue(), "org.eclipse.jetty.ee9")) {
                                 n.setString(StringUtils.replace(n.getValue(), "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8"));
@@ -260,8 +260,8 @@ public class ModifyEE9ToEE8
                         @Override
                         public Visitable visit(JavadocComment n, Void arg) {
 
-                            if (StringUtils.contains(n.getContent(), "jakarta.servlet")) {
-                                n.setContent(StringUtils.replace(n.getContent(),"jakarta.servlet", "javax.servlet"));
+                            if (StringUtils.contains(n.getContent(), "jakarta.")) {
+                                n.setContent(StringUtils.replace(n.getContent(),"jakarta.", "javax."));
                             }
                             return super.visit(n, arg);
                         }
@@ -284,8 +284,8 @@ public class ModifyEE9ToEE8
                                 }
 
                             }
-                            if (currentName.startsWith("jakarta.servlet.")) {
-                                String newName = StringUtils.replace(currentName, "jakarta.servlet.", "javax.servlet.");
+                            if (currentName.startsWith("jakarta.")) {
+                                String newName = StringUtils.replace(currentName, "jakarta.", "javax.");
                                 ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
                                 if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
                                     n = parseResult.getResult().get();
@@ -352,8 +352,8 @@ public class ModifyEE9ToEE8
             String newType = StringUtils.replace(currentType, "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8");
             return newType;
         }
-        if (currentType.startsWith("jakarta.servlet")) {
-            String newType = StringUtils.replace(currentType, "jakarta.servlet", "javax.servlet");
+        if (currentType.startsWith("jakarta.")) {
+            String newType = StringUtils.replace(currentType, "jakarta.", "javax.");
             return newType;
         }
 
