@@ -240,6 +240,10 @@ public class ModifyEE9ToEE8
                                 String newName = StringUtils.replace(currentName, "jakarta.transaction", "java.transaction");
                                 n.setName(newName);
                             }
+                            if (StringUtils.contains(currentName, "jakarta.annotation")) {
+                                String newName = StringUtils.replace(currentName, "jakarta.annotation", "java.annotation");
+                                n.setName(newName);
+                            }
                             changeEE9NameToEE8(n);
                             return super.visit(n, arg);
                         }

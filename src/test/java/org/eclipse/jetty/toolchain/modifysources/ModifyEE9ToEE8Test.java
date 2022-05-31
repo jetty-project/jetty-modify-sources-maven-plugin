@@ -54,34 +54,46 @@ public class ModifyEE9ToEE8Test
         assertNotNull( outputDirectory );
         assertTrue( outputDirectory.exists() );
 
-        Path modified = Paths.get(outputDirectory.toString(), "org", "jetty", "Scanner.java");
+        {
+            Path modified = Paths.get(outputDirectory.toString(), "org", "jetty", "Scanner.java");
 
-        assertTrue(Files.exists(modified));
+            assertTrue(Files.exists(modified));
 
-        String sourceModified = new String(Files.readAllBytes(modified));
-        assertTrue(sourceModified.contains("package org.eclipse.jetty.ee8.nested;"));
-        assertFalse(sourceModified.contains("package org.eclipse.jetty.ee9.nested;"));
-        assertFalse(sourceModified.contains("org/eclipse/jetty/ee9"));
-        assertFalse(sourceModified.contains("webdefault-ee9.xml"));
-        assertFalse(sourceModified.contains("jakarta/servlet"));
-        assertFalse(sourceModified.contains("jakarta/websocket"));
-        assertFalse(sourceModified.contains("jakarta.servlet"));
-        assertFalse(sourceModified.contains("jakarta.websocket"));
-        assertFalse(sourceModified.contains("org.eclipse.jetty.ee9"));
-        assertTrue(
-                sourceModified.contains("protected void handleOptions(Request request, org.eclipse.jetty.ee8.nested.Response response) throws IOException"));
-        assertTrue(
-                sourceModified.contains("final org.eclipse.jetty.ee8.nested.Response response = channel.getResponse();"));
-        assertTrue(
-                sourceModified.contains("import javax.servlet.ServletRequestEvent;"));
-        assertTrue(
-                sourceModified.contains("import javax.websocket.ContainerProvider;"));
-        assertTrue(
-                sourceModified.contains("final HttpServletResponse response = org.eclipse.jetty.ee8.nested.Response.unwrap(event.getSuppliedResponse());"));
+            String sourceModified = new String(Files.readAllBytes(modified));
+            assertTrue(sourceModified.contains("package org.eclipse.jetty.ee8.nested;"));
+            assertFalse(sourceModified.contains("package org.eclipse.jetty.ee9.nested;"));
+            assertFalse(sourceModified.contains("org/eclipse/jetty/ee9"));
+            assertFalse(sourceModified.contains("webdefault-ee9.xml"));
+            assertFalse(sourceModified.contains("jakarta/servlet"));
+            assertFalse(sourceModified.contains("jakarta/websocket"));
+            assertFalse(sourceModified.contains("jakarta.servlet"));
+            assertFalse(sourceModified.contains("jakarta.websocket"));
+            assertFalse(sourceModified.contains("org.eclipse.jetty.ee9"));
+            assertTrue(
+                    sourceModified.contains("protected void handleOptions(Request request, org.eclipse.jetty.ee8.nested.Response response) throws IOException"));
+            assertTrue(
+                    sourceModified.contains("final org.eclipse.jetty.ee8.nested.Response response = channel.getResponse();"));
+            assertTrue(
+                    sourceModified.contains("import javax.servlet.ServletRequestEvent;"));
+            assertTrue(
+                    sourceModified.contains("import javax.websocket.ContainerProvider;"));
+            assertTrue(
+                    sourceModified.contains("final HttpServletResponse response = org.eclipse.jetty.ee8.nested.Response.unwrap(event.getSuppliedResponse());"));
 
-        assertTrue(
-                sourceModified.contains("if (!javax.servlet.Filter.class.isAssignableFrom(getHeldClass())) {"));
+            assertTrue(
+                    sourceModified.contains("if (!javax.servlet.Filter.class.isAssignableFrom(getHeldClass())) {"));
+        }
 
+        {
+            Path modifiedModuleInfo = Paths.get(outputDirectory.toString(), "module-info.java");
+            assertTrue(Files.exists(modifiedModuleInfo));
+            String sourceModifiedModuleInfo = new String(Files.readAllBytes(modifiedModuleInfo));
+            assertTrue(sourceModifiedModuleInfo.contains("requires java.annotation;"));
+            assertTrue(sourceModifiedModuleInfo.contains("requires java.transaction;"));
+            assertTrue(sourceModifiedModuleInfo.contains("exports org.eclipse.jetty.ee8.annotations;"));
+            assertFalse(sourceModifiedModuleInfo.contains("jakarta"));
+            assertFalse(sourceModifiedModuleInfo.contains("org.eclipse.jetty.ee9"));
+        }
     }
 
 }
