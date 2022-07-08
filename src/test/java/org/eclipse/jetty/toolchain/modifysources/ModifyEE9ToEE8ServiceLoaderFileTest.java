@@ -10,9 +10,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.io.FileMatchers.anExistingDirectory;
+import static org.hamcrest.io.FileMatchers.anExistingFile;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 public class ModifyEE9ToEE8ServiceLoaderFileTest
 {
@@ -40,55 +44,55 @@ public class ModifyEE9ToEE8ServiceLoaderFileTest
     {
 
         File pom = new File( "target/test-classes/project-modify/" );
-        assertNotNull( pom );
-        assertTrue( pom.exists() );
+        assertThat(pom, notNullValue());
 
         ModifyEE9ToEE8ServiceLoaderFiles mojo =
             (ModifyEE9ToEE8ServiceLoaderFiles) rule.lookupConfiguredMojo( pom, "modify-service-loader-files-ee9-to-ee8" );
-        assertNotNull( mojo );
+        assertThat(mojo, notNullValue());
         mojo.setOutputDirectory(new File("target/test-classes/project-modify/src/main/resources"));
 
         mojo.execute();
 
         File outputDirectory = (File) rule.getVariableValueFromObject( mojo, "outputDirectory" );
-        assertNotNull( outputDirectory );
-        assertTrue( outputDirectory.exists() );
+        assertThat(outputDirectory, notNullValue());
+        assertThat(outputDirectory, anExistingDirectory());
 
         Path modified = Paths.get(outputDirectory.toString(), "META-INF", "services", "org.eclipse.jetty.ee9.webapp.Configuration");
-        assertFalse(Files.exists(modified));
+        assertThat(modified.toFile(), not(anExistingFile()));
 
         modified = Paths.get(outputDirectory.toString(), "META-INF", "services", "org.eclipse.jetty.ee8.webapp.Configuration");
-        assertTrue(Files.exists(modified));
+        assertThat(modified.toFile(), anExistingFile());
 
         String modifiedContent = new String(Files.readAllBytes(modified));
-        assertFalse(modifiedContent.contains("org.eclipse.jetty.ee9"));
+        assertThat(modifiedContent, not(containsString("org.eclipse.jetty.ee9")));
 
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.FragmentConfiguration"));
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.JettyWebXmlConfiguration"));
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.JaasConfiguration"));
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.JaspiConfiguration"));
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.JmxConfiguration"));
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.JndiConfiguration"));
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.JspConfiguration"));
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.MetaInfConfiguration"));
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.ServletsConfiguration"));
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.WebAppConfiguration"));
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.WebInfConfiguration"));
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.webapp.WebXmlConfiguration"));
+        assertThat(modifiedContent, containsString("org.eclipse.jetty.ee8.webapp.FragmentConfiguration"));
+        assertThat(modifiedContent, containsString("org.eclipse.jetty.ee8.webapp.JettyWebXmlConfiguration"));
+        assertThat(modifiedContent, containsString("org.eclipse.jetty.ee8.webapp.JaasConfiguration"));
+        assertThat(modifiedContent, containsString("org.eclipse.jetty.ee8.webapp.JaspiConfiguration"));
+        assertThat(modifiedContent, containsString("org.eclipse.jetty.ee8.webapp.JmxConfiguration"));
+        assertThat(modifiedContent, containsString("org.eclipse.jetty.ee8.webapp.JndiConfiguration"));
+        assertThat(modifiedContent, containsString("org.eclipse.jetty.ee8.webapp.JspConfiguration"));
+        assertThat(modifiedContent, containsString("org.eclipse.jetty.ee8.webapp.MetaInfConfiguration"));
+        assertThat(modifiedContent, containsString("org.eclipse.jetty.ee8.webapp.ServletsConfiguration"));
+        assertThat(modifiedContent, containsString("org.eclipse.jetty.ee8.webapp.WebAppConfiguration"));
+        assertThat(modifiedContent, containsString("org.eclipse.jetty.ee8.webapp.WebInfConfiguration"));
+        assertThat(modifiedContent, containsString("org.eclipse.jetty.ee8.webapp.WebXmlConfiguration"));
 
 
         modified = Paths.get(outputDirectory.toString(), "META-INF", "services", "jakarta.servlet.ServletContainerInitializer");
-        assertFalse(Files.exists(modified));
+        assertThat(modified.toFile(), not(anExistingFile()));
 
         modified = Paths.get(outputDirectory.toString(), "META-INF", "services", "javax.servlet.ServletContainerInitializer");
-        assertTrue(Files.exists(modified));
+        assertThat(modified.toFile(), anExistingFile());
 
         modifiedContent = new String(Files.readAllBytes(modified));
-        assertFalse(modifiedContent.contains("org.eclipse.jetty.ee9"));
+        assertThat(modifiedContent, not(containsString("org.eclipse.jetty.ee9")));
 
-        assertFalse(modifiedContent.contains("org.eclipse.jetty.ee9.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer"));
-        assertTrue(modifiedContent.contains("org.eclipse.jetty.ee8.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer"));
-
+        assertThat(modifiedContent,
+                not(containsString("org.eclipse.jetty.ee9.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer")));
+        assertThat(modifiedContent,
+                containsString("org.eclipse.jetty.ee8.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer"));
 
     }
 

@@ -17,6 +17,7 @@ import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -251,6 +252,14 @@ public class ModifyEE9ToEE8
                         @Override
                         public Visitable visit(ModuleProvidesDirective n, Void arg) {
                             changeEE9NameToEE8(n);
+                            if (!n.getWith().isEmpty()) {
+                                // ((Name) n.childNodes.get(0)).setQualifier(new Name("org.eclipse.jetty.ee8.websocket.common"))
+                                n.getWith().stream()
+                                        .filter(name -> StringUtils.contains(name.asString(),"org.eclipse.jetty.ee9"))
+                                        .forEach(name -> name.setQualifier(new Name(StringUtils.replace(name.asString(),
+                                                "org.eclipse.jetty.ee9",
+                                                "org.eclipse.jetty.ee8"))));
+                            }
                             return super.visit(n, arg);
                         }
 

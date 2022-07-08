@@ -10,9 +10,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.io.FileMatchers.anExistingDirectory;
+import static org.hamcrest.io.FileMatchers.anExistingFile;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 public class ModifyEE9ToEE8Test
 {
@@ -40,59 +44,53 @@ public class ModifyEE9ToEE8Test
     {
 
         File pom = new File( "target/test-classes/project-modify/" );
-        assertNotNull( pom );
-        assertTrue( pom.exists() );
+        assertThat(pom, notNullValue());
 
         ModifyEE9ToEE8 mojo =
             (ModifyEE9ToEE8) rule.lookupConfiguredMojo( pom, "modify-sources-ee9-to-ee8" );
-        assertNotNull( mojo );
+        assertThat(mojo, notNullValue());
         mojo.setSourceProjectLocation(new File("target/test-classes/project-modify/src/main/java"));
         mojo.setMoveDirectoryStructure(false);
         mojo.execute();
 
         File outputDirectory = (File) rule.getVariableValueFromObject( mojo, "outputDirectory" );
-        assertNotNull( outputDirectory );
-        assertTrue( outputDirectory.exists() );
+        assertThat(outputDirectory, notNullValue());
+        assertThat(outputDirectory, anExistingDirectory());
 
         {
             Path modified = Paths.get(outputDirectory.toString(), "org", "jetty", "Scanner.java");
-
-            assertTrue(Files.exists(modified));
+            assertThat(modified.toFile(), anExistingFile());
 
             String sourceModified = new String(Files.readAllBytes(modified));
-            assertTrue(sourceModified.contains("package org.eclipse.jetty.ee8.nested;"));
-            assertFalse(sourceModified.contains("package org.eclipse.jetty.ee9.nested;"));
-            assertFalse(sourceModified.contains("org/eclipse/jetty/ee9"));
-            assertFalse(sourceModified.contains("webdefault-ee9.xml"));
-            assertFalse(sourceModified.contains("jakarta/servlet"));
-            assertFalse(sourceModified.contains("jakarta/websocket"));
-            assertFalse(sourceModified.contains("jakarta.servlet"));
-            assertFalse(sourceModified.contains("jakarta.websocket"));
-            assertFalse(sourceModified.contains("org.eclipse.jetty.ee9"));
-            assertTrue(
-                    sourceModified.contains("protected void handleOptions(Request request, org.eclipse.jetty.ee8.nested.Response response) throws IOException"));
-            assertTrue(
-                    sourceModified.contains("final org.eclipse.jetty.ee8.nested.Response response = channel.getResponse();"));
-            assertTrue(
-                    sourceModified.contains("import javax.servlet.ServletRequestEvent;"));
-            assertTrue(
-                    sourceModified.contains("import javax.websocket.ContainerProvider;"));
-            assertTrue(
-                    sourceModified.contains("final HttpServletResponse response = org.eclipse.jetty.ee8.nested.Response.unwrap(event.getSuppliedResponse());"));
+            assertThat(sourceModified, containsString("package org.eclipse.jetty.ee8.nested;"));
+            assertThat(sourceModified, not(containsString("package org.eclipse.jetty.ee9.nested;")));
+            assertThat(sourceModified, not(containsString("org/eclipse/jetty/ee9")));
+            assertThat(sourceModified, not(containsString("webdefault-ee9.xml")));
+            assertThat(sourceModified, not(containsString("jakarta/servlet")));
+            assertThat(sourceModified, not(containsString("jakarta/websocket")));
+            assertThat(sourceModified, not(containsString("jakarta.servlet")));
+            assertThat(sourceModified, not(containsString("jakarta.websocket")));
+            assertThat(sourceModified, not(containsString("org.eclipse.jetty.ee9")));
+            assertThat(sourceModified, containsString("protected void handleOptions(Request request, org.eclipse.jetty.ee8.nested.Response response) throws IOException"));
+            assertThat(sourceModified, containsString("final org.eclipse.jetty.ee8.nested.Response response = channel.getResponse();"));
+            assertThat(sourceModified, containsString("import javax.servlet.ServletRequestEvent;"));
+            assertThat(sourceModified, containsString("import javax.websocket.ContainerProvider;"));
+            assertThat(sourceModified,
+                    containsString("final HttpServletResponse response = org.eclipse.jetty.ee8.nested.Response.unwrap(event.getSuppliedResponse());"));
 
-            assertTrue(
-                    sourceModified.contains("if (!javax.servlet.Filter.class.isAssignableFrom(getHeldClass())) {"));
+            assertThat(sourceModified, containsString("if (!javax.servlet.Filter.class.isAssignableFrom(getHeldClass())) {"));
         }
 
         {
             Path modifiedModuleInfo = Paths.get(outputDirectory.toString(), "module-info.java");
-            assertTrue(Files.exists(modifiedModuleInfo));
+            assertThat(modifiedModuleInfo.toFile(), anExistingFile());
             String sourceModifiedModuleInfo = new String(Files.readAllBytes(modifiedModuleInfo));
-            assertTrue(sourceModifiedModuleInfo.contains("requires java.annotation;"));
-            assertTrue(sourceModifiedModuleInfo.contains("requires java.transaction;"));
-            assertTrue(sourceModifiedModuleInfo.contains("exports org.eclipse.jetty.ee8.annotations;"));
-            assertFalse(sourceModifiedModuleInfo.contains("jakarta"));
-            assertFalse(sourceModifiedModuleInfo.contains("org.eclipse.jetty.ee9"));
+            assertThat(sourceModifiedModuleInfo, containsString("requires java.annotation;"));
+            assertThat(sourceModifiedModuleInfo, containsString("requires java.transaction;"));
+            assertThat(sourceModifiedModuleInfo, containsString("exports org.eclipse.jetty.ee8.annotations;"));
+            assertThat(sourceModifiedModuleInfo, not(containsString("jakarta")));
+            assertThat(sourceModifiedModuleInfo, not(containsString("org.eclipse.jetty.ee9")));
+
         }
     }
 
