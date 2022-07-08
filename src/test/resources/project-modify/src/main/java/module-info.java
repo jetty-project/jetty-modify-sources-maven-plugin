@@ -25,6 +25,8 @@ module org.eclipse.jetty.ee9.annotations
 
     uses jakarta.servlet.ServletContainerInitializer;
 
-    provides Configuration with
-        AnnotationConfiguration;
+    provides Configuration with AnnotationConfiguration;
+
+    provides org.eclipse.jetty.ee9.websocket.api.ExtensionConfig.Parser with
+            org.eclipse.jetty.ee9.websocket.common.ExtensionConfigParser;
 }
