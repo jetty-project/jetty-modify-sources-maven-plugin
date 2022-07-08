@@ -253,12 +253,12 @@ public class ModifyEE9ToEE8
                         public Visitable visit(ModuleProvidesDirective n, Void arg) {
                             changeEE9NameToEE8(n);
                             if (!n.getWith().isEmpty()) {
-                                // ((Name) n.childNodes.get(0)).setQualifier(new Name("org.eclipse.jetty.ee8.websocket.common"))
                                 n.getWith().stream()
-                                        .filter(name -> StringUtils.contains(name.asString(),"org.eclipse.jetty.ee9"))
-                                        .forEach(name -> name.setQualifier(new Name(StringUtils.replace(name.asString(),
-                                                "org.eclipse.jetty.ee9",
-                                                "org.eclipse.jetty.ee8"))));
+                                        .filter(name -> name.getQualifier().isPresent())
+                                        .filter(name -> StringUtils.contains(name.getQualifier().get().asString(),"org.eclipse.jetty.ee9."))
+                                        .forEach(name -> name.setQualifier(new Name(StringUtils.replace(name.getQualifier().get().asString(),
+                                                "org.eclipse.jetty.ee9.",
+                                                "org.eclipse.jetty.ee8."))));
                             }
                             return super.visit(n, arg);
                         }

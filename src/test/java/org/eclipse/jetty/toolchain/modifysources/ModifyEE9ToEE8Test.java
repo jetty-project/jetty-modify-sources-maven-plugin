@@ -91,6 +91,8 @@ public class ModifyEE9ToEE8Test
             assertThat(sourceModifiedModuleInfo, not(containsString("jakarta")));
             assertThat(sourceModifiedModuleInfo, not(containsString("org.eclipse.jetty.ee9")));
 
+            assertThat(sourceModifiedModuleInfo, containsString("org.eclipse.jetty.ee8.websocket.common.ExtensionConfigParser;"));
+            assertThat(sourceModifiedModuleInfo, containsString("org.eclipse.jetty.ee8.websocket.api.ExtensionConfig.Parser with"));
         }
     }
 
