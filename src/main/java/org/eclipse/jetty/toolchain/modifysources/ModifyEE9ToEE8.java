@@ -231,6 +231,14 @@ public class ModifyEE9ToEE8
                         @Override
                         public Visitable visit(ModuleExportsDirective n, Void arg) {
                             changeEE9NameToEE8(n);
+                            if (!n.getModuleNames().isEmpty()) {
+                                n.getModuleNames().stream()
+                                        .filter(name -> name.getQualifier().isPresent())
+                                        .filter(name -> StringUtils.contains(name.getQualifier().get().asString(),"org.eclipse.jetty.ee9."))
+                                        .forEach(name -> name.setQualifier(new Name(StringUtils.replace(name.getQualifier().get().asString(),
+                                                "org.eclipse.jetty.ee9.",
+                                                "org.eclipse.jetty.ee8."))));
+                            }
                             return super.visit(n, arg);
                         }
 

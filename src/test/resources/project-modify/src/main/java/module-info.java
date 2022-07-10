@@ -29,4 +29,6 @@ module org.eclipse.jetty.ee9.annotations
 
     provides org.eclipse.jetty.ee9.websocket.api.ExtensionConfig.Parser with
             org.eclipse.jetty.ee9.websocket.common.ExtensionConfigParser;
+
+    exports org.eclipse.jetty.ee9.websocket.jakarta.client.internal to org.eclipse.jetty.ee9.websocket.jakarta.server;
 }
