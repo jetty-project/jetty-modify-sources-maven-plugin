@@ -318,9 +318,10 @@ public class ModifyEE9ToEE8
             Files.createDirectories(out);
             sourceRoot.saveAll(out);
 
-            if (moveDirectoryStructure) {
-                FileUtils.copyDirectory(new File(outputDirectory, "org/eclipse/jetty/ee9"),
-                        new File(outputDirectory, "org/eclipse/jetty/ee8"));
+            File ee9Directory = new File(outputDirectory, "org/eclipse/jetty/ee9");
+
+            if (moveDirectoryStructure && Files.exists(ee9Directory.toPath())) {
+                FileUtils.copyDirectory(ee9Directory, new File(outputDirectory, "org/eclipse/jetty/ee8"));
                 FileUtils.deleteDirectory(new File(outputDirectory, "org/eclipse/jetty/ee9"));
             }
 
