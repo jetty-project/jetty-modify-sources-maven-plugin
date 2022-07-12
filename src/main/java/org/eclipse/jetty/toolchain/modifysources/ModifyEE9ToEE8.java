@@ -245,6 +245,9 @@ public class ModifyEE9ToEE8
                         @Override
                         public Visitable visit(ModuleRequiresDirective n, Void arg) {
                             String currentName = n.getName().asString();
+                            if (StringUtils.equals("jakarta.mail", currentName) && n.isStatic()) {
+                                n.setName("javax.mail.glassfish");
+                            }
                             if (StringUtils.contains(currentName, "jakarta.transaction")) {
                                 String newName = StringUtils.replace(currentName, "jakarta.transaction", "java.transaction");
                                 n.setName(newName);

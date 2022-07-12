@@ -94,6 +94,8 @@ public class ModifyEE9ToEE8Test
             assertThat(sourceModifiedModuleInfo, containsString("org.eclipse.jetty.ee8.websocket.api.ExtensionConfig.Parser with"));
             assertThat(sourceModifiedModuleInfo,
                     containsString("exports org.eclipse.jetty.ee8.websocket.jakarta.client.internal to org.eclipse.jetty.ee8.websocket.jakarta.server;"));
+
+            assertThat(sourceModifiedModuleInfo, containsString("requires static javax.mail.glassfish;"));
         }
     }
 
