@@ -213,6 +213,12 @@ public class ModifyEE9ToEE8
                             if(StringUtils.equals(n.getValue(), "ee9")) {
                                 n.setString(StringUtils.replace(n.getValue(), "ee9", "ee8"));
                             }
+                            if(StringUtils.contains(n.getValue(), "ee9")) {
+                                n.setString(StringUtils.replace(n.getValue(), "ee9", "ee8"));
+                            }
+                            if(StringUtils.contains(n.getValue(), "EE9")) {
+                                n.setString(StringUtils.replace(n.getValue(), "EE9", "EE8"));
+                            }
                             if(StringUtils.contains(n.getValue(), "org.eclipse.jetty.ee9")) {
                                 n.setString(StringUtils.replace(n.getValue(), "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8"));
                             }

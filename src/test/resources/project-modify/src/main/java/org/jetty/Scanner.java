@@ -61,6 +61,7 @@ import jakarta.servlet.http.HttpSessionListener;
 import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.WebSocketContainer;
 
+import org.eclipse.jetty.util.annotation.ManagedObject;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -73,6 +74,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * files and reporting these events via registered Listeners.
  *
  */
+@ManagedObject("EE9 Context")
 public class Scanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
 {
     private static int __scannerId=0;
@@ -95,7 +97,7 @@ public class Scanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
     public static final String DEFAULT = "jakarta/servlet/foo/bar/beer.xml";
 
     public static final Environment ENVIRONMENT = Environment.ensure("ee9");
-
+    
     public static final int SERVLET_MAJOR_VERSION = 5;
 
     public enum Notification { ADDED, CHANGED, REMOVED };

@@ -2,6 +2,7 @@ package org.eclipse.jetty.toolchain.modifysources;
 
 
 import org.apache.maven.plugin.testing.MojoRule;
+import org.eclipse.jetty.util.annotation.ManagedObject;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -72,6 +73,8 @@ public class ModifyEE9ToEE8Test
             assertThat(sourceModified, not(containsString("jakarta.servlet")));
             assertThat(sourceModified, not(containsString("jakarta.websocket")));
             assertThat(sourceModified, not(containsString("org.eclipse.jetty.ee9")));
+            assertThat(sourceModified, not(containsString("@ManagedObject(\"EE9 Context\")")));
+            assertThat(sourceModified, containsString("@ManagedObject(\"EE8 Context\")"));
             assertThat(sourceModified, containsString("protected void handleOptions(Request request, org.eclipse.jetty.ee8.nested.Response response) throws IOException"));
             assertThat(sourceModified, containsString("final org.eclipse.jetty.ee8.nested.Response response = channel.getResponse();"));
             assertThat(sourceModified, containsString("import javax.servlet.ServletRequestEvent;"));
