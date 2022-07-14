@@ -1,5 +1,6 @@
 package org.eclipse.jetty.toolchain.modifysources;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.shared.filtering.DefaultMavenFileFilter;
 import org.apache.maven.shared.filtering.DefaultMavenResourcesFiltering;
@@ -19,8 +20,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 @Singleton
 @Named("ee9-to-ee8")
@@ -32,10 +35,22 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
     public List<String> getDefaultNonFilteredFileExtensions() {
         return Collections.emptyList();
     }
-    
+
     @Inject
     public ResourcesFiltering(MavenFileFilter mavenFileFilter, BuildContext buildContext) {
         super(new JettyMavenFileFilter(buildContext), buildContext);
+    }
+
+    @Override
+    public boolean filteredFileExtension(String fileName, List<String> userNonFilteredFileExtensions) {
+        String ext = getExtension(fileName);
+        return ext == null? false : Arrays.asList("xml", "properties", "txt").contains(ext);
+    }
+
+    private static String getExtension( String fileName )
+    {
+        String rawExt = FilenameUtils.getExtension(fileName);
+        return rawExt == null ? null : rawExt.toLowerCase(Locale.ROOT);
     }
 
     @Override
@@ -84,8 +99,8 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
                         content = StringUtils.replace(content, "webdefault-ee9.xml", "webdefault-ee8.xml");
                     }
                     Files.writeString(to.toPath(), content, StandardCharsets.UTF_8);
+                    buildContext.refresh( to );
                 }
-                buildContext.refresh( to );
             } catch (IOException e) {
                 LOGGER.error("error copying file {} to {}", from, to);
                 throw new MavenFilteringException(e.getMessage(), e);
