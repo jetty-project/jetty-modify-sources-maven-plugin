@@ -32,12 +32,7 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
     public List<String> getDefaultNonFilteredFileExtensions() {
         return Collections.emptyList();
     }
-
-    @Override
-    public boolean filteredFileExtension(String s, List<String> list) {
-        return true;
-    }
-
+    
     @Inject
     public ResourcesFiltering(MavenFileFilter mavenFileFilter, BuildContext buildContext) {
         super(new JettyMavenFileFilter(buildContext), buildContext);
