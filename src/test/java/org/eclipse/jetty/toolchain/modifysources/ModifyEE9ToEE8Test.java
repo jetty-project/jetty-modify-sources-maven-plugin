@@ -78,6 +78,7 @@ public class ModifyEE9ToEE8Test
             assertThat(sourceModified, containsString("import javax.websocket.ContainerProvider;"));
             assertThat(sourceModified, not(containsString("\"ee9\"")));
             assertThat(sourceModified, containsString("\"ee8\""));
+            assertThat(sourceModified, containsString("public static final int SERVLET_MAJOR_VERSION = 4;"));
             assertThat(sourceModified,
                     containsString("final HttpServletResponse response = org.eclipse.jetty.ee8.nested.Response.unwrap(event.getSuppliedResponse());"));
 

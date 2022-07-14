@@ -96,6 +96,8 @@ public class Scanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
 
     public static final Environment ENVIRONMENT = Environment.ensure("ee9");
 
+    public static final int SERVLET_MAJOR_VERSION = 5;
+
     public enum Notification { ADDED, CHANGED, REMOVED };
     private final Map<String,Notification> _notifications = new HashMap<String,Notification>();
 

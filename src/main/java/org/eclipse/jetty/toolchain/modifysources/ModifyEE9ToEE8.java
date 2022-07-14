@@ -16,6 +16,7 @@ import com.github.javaparser.ast.expr.CastExpr;
 import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -151,6 +152,9 @@ public class ModifyEE9ToEE8
 
                         @Override
                         public Visitable visit(VariableDeclarator n, Void arg) {
+                            if (StringUtils.equals(n.getNameAsString(), "SERVLET_MAJOR_VERSION")) {
+                               n.setInitializer(new IntegerLiteralExpr("4"));
+                            }
                             changeEE9TypeToEE8(n);
                             return super.visit(n, arg);
                         }
