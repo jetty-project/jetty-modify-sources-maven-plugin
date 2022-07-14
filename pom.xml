@@ -98,6 +98,11 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-filtering</artifactId>
+      <version>3.3.0</version>
+    </dependency>
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>2.11.0</version>
@@ -208,6 +213,18 @@
             <id>help-goal</id>
             <goals>
               <goal>helpmojo</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-component-metadata</artifactId>
+        <version>1.7.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate-metadata</goal>
             </goals>
           </execution>
         </executions>

@@ -203,6 +203,9 @@ public class ModifyEE9ToEE8
                             if(StringUtils.contains(n.getValue(), "jakarta/")) {
                                 n.setString(StringUtils.replace(n.getValue(), "jakarta/", "javax/"));
                             }
+                            if(StringUtils.contains(n.getValue(), "jetty-ee9")) {
+                                n.setString(StringUtils.replace(n.getValue(), "jetty-ee9", "jetty-ee8"));
+                            }
                             if(StringUtils.contains(n.getValue(), "org.eclipse.jetty.ee9")) {
                                 n.setString(StringUtils.replace(n.getValue(), "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8"));
                             }
@@ -322,6 +325,9 @@ public class ModifyEE9ToEE8
                             }
                             return super.visit(n, arg);
                         }
+
+
+
                     }, null );
 
             }

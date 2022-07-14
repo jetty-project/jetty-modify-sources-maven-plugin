@@ -192,6 +192,10 @@ public class Scanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
     {
         _scanInterval = scanInterval;
         schedule();
+
+        Path war =
+                home.resolve("jetty-ee9/jetty-ee9-demos/jetty-ee9-demo-async-rest/jetty-ee9-demo-async-rest-webapp/target/jetty-ee9-demo-async-rest-webapp-12.0.0-SNAPSHOT");
+
     }
 
     public void setScanDirs (List<File> dirs)

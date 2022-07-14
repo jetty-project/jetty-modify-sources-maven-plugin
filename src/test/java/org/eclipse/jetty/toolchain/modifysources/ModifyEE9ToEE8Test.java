@@ -64,6 +64,7 @@ public class ModifyEE9ToEE8Test
             String sourceModified = new String(Files.readAllBytes(modified));
             assertThat(sourceModified, containsString("package org.eclipse.jetty.ee8.nested;"));
             assertThat(sourceModified, not(containsString("package org.eclipse.jetty.ee9.nested;")));
+            assertThat(sourceModified, not(containsString("jetty-ee9")));
             assertThat(sourceModified, not(containsString("org/eclipse/jetty/ee9")));
             assertThat(sourceModified, not(containsString("webdefault-ee9.xml")));
             assertThat(sourceModified, not(containsString("jakarta/servlet")));
