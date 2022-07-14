@@ -94,6 +94,8 @@ public class Scanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
 
     public static final String DEFAULT = "jakarta/servlet/foo/bar/beer.xml";
 
+    public static final Environment ENVIRONMENT = Environment.ensure("ee9");
+
     public enum Notification { ADDED, CHANGED, REMOVED };
     private final Map<String,Notification> _notifications = new HashMap<String,Notification>();
 
