@@ -63,7 +63,8 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
                              String encoding, boolean overwrite )
                 throws MavenFilteringException {
             try {
-                if (Files.exists(from.toPath())) {
+                // not looking at non filtered files
+                if (filtering && Files.exists(from.toPath())) {
                     // well it is definitely not the best option to read the full content but shouldn't be too big files
                     String content = Files.readString(from.toPath());
                     if(StringUtils.contains(content, "jakarta.")) {
@@ -91,6 +92,7 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
                 }
                 buildContext.refresh( to );
             } catch (IOException e) {
+                LOGGER.error("error copying file {} to {}", from, to);
                 throw new MavenFilteringException(e.getMessage(), e);
             }
         }
