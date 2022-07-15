@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.eclipse.jetty.toolchain.it</groupId>
+  <artifactId>filtering-it</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <description>A simple IT verifying the basic filtering use case.</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <src.dir>${project.build.directory}/foo</src.dir>
+    <hazelcast.version>3.9.3</hazelcast.version>
+    <jetty.version>9.4.41.v20210516</jetty.version>
+  </properties>
+
+  <build>
+    <sourceDirectory>${src.dir}</sourceDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <nonFilteredFileExtensions>
+            <nonFilteredFileExtension>p12</nonFilteredFileExtension>
+            <nonFilteredFileExtension>raw</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jar</nonFilteredFileExtension>
+            <nonFilteredFileExtension>war</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jks</nonFilteredFileExtension>
+            <nonFilteredFileExtension>tga</nonFilteredFileExtension>
+            <nonFilteredFileExtension>zip</nonFilteredFileExtension>
+            <nonFilteredFileExtension>gz</nonFilteredFileExtension>
+            <nonFilteredFileExtension>tif</nonFilteredFileExtension>
+            <nonFilteredFileExtension>tiff</nonFilteredFileExtension>
+            <nonFilteredFileExtension>svgz</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jp2</nonFilteredFileExtension>
+            <nonFilteredFileExtension>rar</nonFilteredFileExtension>
+            <nonFilteredFileExtension>bz2</nonFilteredFileExtension>
+            <nonFilteredFileExtension>br</nonFilteredFileExtension>
+            <nonFilteredFileExtension>xcf</nonFilteredFileExtension>
+          </nonFilteredFileExtensions>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-filtering</artifactId>
+            <version>3.3.0</version>
+          </dependency>
+          <dependency>
+            <groupId>@project.groupId@</groupId>
+            <artifactId>@project.artifactId@</artifactId>
+            <version>@project.version@</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>copy-ee8-test-resources</id>
+            <phase>generate-test-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <mavenFilteringHints>
+                <mavenFilteringHint>ee9-to-ee8</mavenFilteringHint>
+              </mavenFilteringHints>
+              <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+              <resources>
+                <resource>
+                  <filtering>true</filtering>
+                  <directory>src/main/config</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
