@@ -83,7 +83,7 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
                     if(StringUtils.contains(content, "jakarta/")) {
                         content = StringUtils.replace(content, "jakarta/", "javax/");
                     }
-                    if(StringUtils.equals(content, "ee9")) {
+                    if(StringUtils.contains(content, "ee9")) {
                         content = StringUtils.replace(content, "ee9", "ee8");
                     }
                     Files.writeString(to.toPath(), content, StandardCharsets.UTF_8);
