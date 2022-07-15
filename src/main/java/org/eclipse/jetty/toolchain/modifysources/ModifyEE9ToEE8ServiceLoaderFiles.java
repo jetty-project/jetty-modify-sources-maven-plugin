@@ -54,7 +54,7 @@ public class ModifyEE9ToEE8ServiceLoaderFiles
             // file starting with org.eclipse.jetty.ee9 or jakarta.servlet
             {
                 String[] files = metaInfDirectory.list((dir, name) -> StringUtils.startsWith(name, "org.eclipse.jetty.ee9") ||
-                        StringUtils.startsWith(name, "jakarta.servlet"));
+                        StringUtils.startsWith(name, "jakarta."));
                 if (files==null) {
                     return;
                 }
