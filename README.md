@@ -1,8 +1,4 @@
 # jetty-modify-sources-maven-plugin
 
-The goal of this plugin is to simply remove logger debug statement from source code.
-This include
-* if(LOG.isDebugEnabled())
-* LOG.debug("foo bar")
-
+The purpose of this plugin is to modify ee9 to ee8 sources in the jetty-12.0.x tree.
 I guess it can be used outside of Eclipse Jetty sources.
