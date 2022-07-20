@@ -92,7 +92,7 @@ public class ModifyEE9ToEE8ServiceLoaderFileTest
         assertThat(modifiedContent,
                 not(containsString("org.eclipse.jetty.ee9.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer")));
         assertThat(modifiedContent,
-                containsString("org.eclipse.jetty.ee8.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer"));
+                containsString("org.eclipse.jetty.ee8.websocket.javax.server.config.JakartaWebSocketServletContainerInitializer"));
 
     }
 

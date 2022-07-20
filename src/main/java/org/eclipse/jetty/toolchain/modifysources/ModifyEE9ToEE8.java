@@ -45,10 +45,12 @@ import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Modify sources from EE9 project to be compiled with EE8 dependencies
@@ -201,11 +203,8 @@ public class ModifyEE9ToEE8
 
                         @Override
                         public Visitable visit(StringLiteralExpr n, Void arg) {
-                            if(StringUtils.contains(n.getValue(), "jakarta.")) {
-                                n.setString(StringUtils.replace(n.getValue(), "jakarta.", "javax."));
-                            }
-                            if(StringUtils.contains(n.getValue(), "jakarta/")) {
-                                n.setString(StringUtils.replace(n.getValue(), "jakarta/", "javax/"));
+                            if(StringUtils.contains(n.getValue(), "jakarta")) {
+                                n.setString(StringUtils.replace(n.getValue(), "jakarta", "javax"));
                             }
                             if(StringUtils.contains(n.getValue(), "jetty-ee9")) {
                                 n.setString(StringUtils.replace(n.getValue(), "jetty-ee9", "jetty-ee8"));
@@ -254,6 +253,13 @@ public class ModifyEE9ToEE8
                                         .forEach(name -> name.setQualifier(new Name(StringUtils.replace(name.getQualifier().get().asString(),
                                                 "org.eclipse.jetty.ee9.",
                                                 "org.eclipse.jetty.ee8."))));
+
+                                n.getModuleNames().stream()
+                                        .filter(name -> name.getQualifier().isPresent())
+                                        .filter(name -> StringUtils.contains(name.getQualifier().get().asString(),".jakarta"))
+                                        .forEach(name -> name.setQualifier(new Name(StringUtils.replace(name.getQualifier().get().asString(),
+                                                ".jakarta",
+                                                ".javax"))));
                             }
                             return super.visit(n, arg);
                         }
@@ -286,6 +292,12 @@ public class ModifyEE9ToEE8
                                         .forEach(name -> name.setQualifier(new Name(StringUtils.replace(name.getQualifier().get().asString(),
                                                 "org.eclipse.jetty.ee9.",
                                                 "org.eclipse.jetty.ee8."))));
+                                n.getWith().stream()
+                                        .filter(name -> name.getQualifier().isPresent())
+                                        .filter(name -> StringUtils.contains(name.getQualifier().get().asString(),".jakarta"))
+                                        .forEach(name -> name.setQualifier(new Name(StringUtils.replace(name.getQualifier().get().asString(),
+                                                ".jakarta",
+                                                ".javax"))));
                             }
                             return super.visit(n, arg);
                         }
@@ -305,8 +317,8 @@ public class ModifyEE9ToEE8
                         @Override
                         public Visitable visit(JavadocComment n, Void arg) {
 
-                            if (StringUtils.contains(n.getContent(), "jakarta.")) {
-                                n.setContent(StringUtils.replace(n.getContent(),"jakarta.", "javax."));
+                            if (StringUtils.contains(n.getContent(), "jakarta")) {
+                                n.setContent(StringUtils.replace(n.getContent(),"jakarta", "javax"));
                             }
                             return super.visit(n, arg);
                         }
@@ -329,8 +341,8 @@ public class ModifyEE9ToEE8
                                 }
 
                             }
-                            if (currentName.startsWith("jakarta.")) {
-                                String newName = StringUtils.replace(currentName, "jakarta.", "javax.");
+                            if (currentName.contains("jakarta")) {
+                                String newName = StringUtils.replace(currentName, "jakarta", "javax");
                                 ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
                                 if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
                                     n = parseResult.getResult().get();
@@ -350,9 +362,21 @@ public class ModifyEE9ToEE8
 
             File ee9Directory = new File(outputDirectory, "org/eclipse/jetty/ee9");
 
-            if (moveDirectoryStructure && Files.exists(ee9Directory.toPath())) {
-                FileUtils.copyDirectory(ee9Directory, new File(outputDirectory, "org/eclipse/jetty/ee8"));
-                FileUtils.deleteDirectory(new File(outputDirectory, "org/eclipse/jetty/ee9"));
+            if (moveDirectoryStructure) {
+                File ee8Directory = new File(outputDirectory, "org/eclipse/jetty/ee8");
+                FileUtils.moveDirectory(ee9Directory, ee8Directory);
+                List<Path> pathsEndedJakarta = Files.walk(ee8Directory.toPath())
+                        .filter(path -> Files.isDirectory(path))
+                        .filter(path -> path.getFileName().endsWith("jakarta"))
+                        .collect(Collectors.toList());
+                pathsEndedJakarta.forEach(path -> {
+                    try {
+                        FileUtils.moveDirectory(path.toFile(),
+                                new File(path.toFile().getParentFile(), "javax"));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
 
             if (addToCompileSourceRoot) {
@@ -396,13 +420,17 @@ public class ModifyEE9ToEE8
      * @return will return <code>null</code> if there is nothing to change
      */
     public static String changeEE9TypeToEE8(String currentType) {
+        if (currentType.contains("jakarta")) {
+            String newType = StringUtils.replace(currentType, "jakarta",
+                    "javax");
+            currentType = newType;
+            if (!currentType.startsWith("org.eclipse.jetty.ee9")) {
+                return currentType;
+            }
+        }
         //org.eclipse.jetty.ee9.nested to org.eclipse.jetty.ee8.nested
         if (currentType.startsWith("org.eclipse.jetty.ee9")) {
             String newType = StringUtils.replace(currentType, "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8");
-            return newType;
-        }
-        if (currentType.startsWith("jakarta.")) {
-            String newType = StringUtils.replace(currentType, "jakarta.", "javax.");
             return newType;
         }
 

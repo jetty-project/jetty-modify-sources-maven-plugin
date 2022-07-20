@@ -51,7 +51,7 @@ public class ModifyEE9ToEE8Test
             (ModifyEE9ToEE8) rule.lookupConfiguredMojo( pom, "modify-sources-ee9-to-ee8" );
         assertThat(mojo, notNullValue());
         mojo.setSourceProjectLocation(new File("target/test-classes/project-modify/src/main/java"));
-        mojo.setMoveDirectoryStructure(false);
+        mojo.setMoveDirectoryStructure(true);
         mojo.execute();
 
         File outputDirectory = (File) rule.getVariableValueFromObject( mojo, "outputDirectory" );
@@ -59,11 +59,11 @@ public class ModifyEE9ToEE8Test
         assertThat(outputDirectory, anExistingDirectory());
 
         {
-            Path modified = Paths.get(outputDirectory.toString(), "org", "jetty", "Scanner.java");
+            Path modified = Paths.get(outputDirectory.toString(), "org", "eclipse", "jetty", "ee8", "javax", "nested", "JakartaScanner.java");
             assertThat(modified.toFile(), anExistingFile());
 
             String sourceModified = new String(Files.readAllBytes(modified));
-            assertThat(sourceModified, containsString("package org.eclipse.jetty.ee8.nested;"));
+            assertThat(sourceModified, containsString("package org.eclipse.jetty.ee8.javax.nested;"));
             assertThat(sourceModified, not(containsString("package org.eclipse.jetty.ee9.nested;")));
             assertThat(sourceModified, not(containsString("jetty-ee9")));
             assertThat(sourceModified, not(containsString("org/eclipse/jetty/ee9")));
@@ -100,7 +100,7 @@ public class ModifyEE9ToEE8Test
             assertThat(sourceModifiedModuleInfo, containsString("org.eclipse.jetty.ee8.websocket.common.ExtensionConfigParser;"));
             assertThat(sourceModifiedModuleInfo, containsString("org.eclipse.jetty.ee8.websocket.api.ExtensionConfig.Parser with"));
             assertThat(sourceModifiedModuleInfo,
-                    containsString("exports org.eclipse.jetty.ee8.websocket.jakarta.client.internal to org.eclipse.jetty.ee8.websocket.jakarta.server;"));
+                    containsString("exports org.eclipse.jetty.ee8.websocket.javax.client.internal to org.eclipse.jetty.ee8.websocket.javax.server;"));
 
             assertThat(sourceModifiedModuleInfo, containsString("requires static javax.mail.glassfish;"));
         }
