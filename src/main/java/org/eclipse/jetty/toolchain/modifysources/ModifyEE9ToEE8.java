@@ -362,7 +362,7 @@ public class ModifyEE9ToEE8
 
             File ee9Directory = new File(outputDirectory, "org/eclipse/jetty/ee9");
 
-            if (moveDirectoryStructure) {
+            if (moveDirectoryStructure && Files.isDirectory(ee9Directory.toPath())) {
                 File ee8Directory = new File(outputDirectory, "org/eclipse/jetty/ee8");
                 FileUtils.moveDirectory(ee9Directory, ee8Directory);
                 List<Path> pathsEndedJakarta = Files.walk(ee8Directory.toPath())
