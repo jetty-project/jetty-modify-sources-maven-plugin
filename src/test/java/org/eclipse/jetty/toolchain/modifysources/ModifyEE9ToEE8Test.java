@@ -2,7 +2,6 @@ package org.eclipse.jetty.toolchain.modifysources;
 
 
 import org.apache.maven.plugin.testing.MojoRule;
-import org.eclipse.jetty.util.annotation.ManagedObject;
 import org.junit.Rule;
 import org.junit.Test;
 
