@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,11 @@ public class ModifyEE9ToEE8ServiceLoaderFiles
     @Parameter( defaultValue = "${project}", readonly = true )
     protected MavenProject project;
 
+    /**
+     * extra file names to change content
+     */
+    @Parameter
+    private List<String> extraFileNames = new ArrayList<>();
 
     public void execute()
         throws MojoExecutionException {
@@ -54,20 +60,24 @@ public class ModifyEE9ToEE8ServiceLoaderFiles
             // file starting with org.eclipse.jetty.ee9 or jakarta.servlet
             {
                 String[] files = metaInfDirectory.list((dir, name) -> StringUtils.startsWith(name, "org.eclipse.jetty.ee9") ||
-                        StringUtils.startsWith(name, "jakarta."));
+                        StringUtils.startsWith(name, "jakarta.") || extraFileNames.contains(name));
                 if (files==null) {
                     return;
                 }
                 for (String fileName : files) {
                     File file = new File(metaInfDirectory, fileName);
                     String newFileName = changeEE9TypeToEE8(fileName);
-                    File newFile = new File(metaInfDirectory, newFileName);
+                    File newFile = new File(metaInfDirectory, newFileName == null ? fileName : newFileName);
                     List<String> newContent = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8).
-                            stream().map(s -> changeEE9TypeToEE8(s)).collect(Collectors.toList());
+                            stream().map(ModifyEE9ToEE8::changeEE9TypeToEE8).collect(Collectors.toList());
                     Files.write(newFile.toPath(), newContent, StandardCharsets.UTF_8);
-                    Files.delete(file.toPath());
+                    if (newFileName != null) {
+                        Files.delete(file.toPath());
+                    }
                 }
             }
+
+
 
         } catch (IOException e) {
             throw new MojoExecutionException("fail to modify jetty sources", e);
