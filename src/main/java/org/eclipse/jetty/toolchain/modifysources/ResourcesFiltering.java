@@ -77,15 +77,21 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
                 if (filtering && Files.exists(from.toPath())) {
                     // well it is definitely not the best option to read the full content but shouldn't be too big files
                     String content = Files.readString(from.toPath());
-                    if(StringUtils.contains(content, "jakarta.")) {
-                        content = StringUtils.replace(content, "jakarta.", "javax.");
-                    }
-                    if(StringUtils.contains(content, "jakarta/")) {
-                        content = StringUtils.replace(content, "jakarta/", "javax/");
-                    }
-                    if(StringUtils.contains(content, "ee9")) {
-                        content = StringUtils.replace(content, "ee9", "ee8");
-                    }
+
+                    content = StringUtils.replace(content, "https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd",
+                            "http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd");
+
+                    content = StringUtils.replace(content, "https://jakarta.ee/xml/ns/jakartaee",
+                            "http://xmlns.jcp.org/xml/ns/javaee");
+
+                    content = StringUtils.replace(content, "jakarta.", "javax.");
+                    content = StringUtils.replace(content, "jakarta/", "javax/");
+                    content = StringUtils.replace(content, "ee9", "ee8");
+
+                    content = StringUtils.replace(content, "version=\"5.0\"",
+                            "version=\"4.0\"");
+
+
                     Files.writeString(to.toPath(), content, StandardCharsets.UTF_8);
                     buildContext.refresh( to );
                 }
