@@ -2,7 +2,6 @@ package org.eclipse.jetty.toolchain.modifysources;
 
 
 import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
@@ -45,12 +44,12 @@ import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -96,7 +95,7 @@ public class ModifyEE9ToEE8
      * this is a list of String to not translate if starting with
      */
     @Parameter
-    protected List<String> notTranslateStartsWith = Arrays.asList("https://jakarta.ee/xml/ns/", "http://jakarta.ee/xml/ns/");
+    protected Set<String> notTranslateStartsWith = Set.of("https://jakarta.ee/xml/ns/", "http://jakarta.ee/xml/ns/");
 
 
     public void execute()
@@ -376,7 +375,7 @@ public class ModifyEE9ToEE8
                 File ee8Directory = new File(outputDirectory, "org/eclipse/jetty/ee8");
                 FileUtils.moveDirectory(ee9Directory, ee8Directory);
                 List<Path> pathsEndedJakarta = Files.walk(ee8Directory.toPath())
-                        .filter(path -> Files.isDirectory(path))
+                        .filter(Files::isDirectory)
                         .filter(path -> path.getFileName().endsWith("jakarta"))
                         .collect(Collectors.toList());
                 pathsEndedJakarta.forEach(path -> {
@@ -447,8 +446,8 @@ public class ModifyEE9ToEE8
         return null;
     }
 
-    private boolean startsWith(String str, List<String> startList) {
-        return startList.stream().filter(s -> str.startsWith(s)).findAny().isPresent();
+    private boolean startsWith(String str, Collection<String> startList) {
+        return startList.stream().anyMatch(str::startsWith);
     }
 
     protected void setSourceProjectLocation(File sourceProjectLocation) {
