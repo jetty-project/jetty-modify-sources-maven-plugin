@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -90,6 +91,12 @@ public class ModifyEE9ToEE8
      */
     @Parameter( defaultValue = "${project}", readonly = true )
     protected MavenProject project;
+
+    /**
+     * this is the jakarta ee namespace and it must not be modified in constant, String
+     */
+    @Parameter
+    protected List<String> jakartaNs = Arrays.asList("https://jakarta.ee/xml/ns/", "http://jakarta.ee/xml/ns/");
 
 
     public void execute()
@@ -203,6 +210,9 @@ public class ModifyEE9ToEE8
 
                         @Override
                         public Visitable visit(StringLiteralExpr n, Void arg) {
+                            if (startsWith(n.getValue(), jakartaNs)) {
+                                return super.visit(n, arg);
+                            }
                             if(StringUtils.contains(n.getValue(), "jakarta")) {
                                 n.setString(StringUtils.replace(n.getValue(), "jakarta", "javax"));
                             }
@@ -437,6 +447,9 @@ public class ModifyEE9ToEE8
         return null;
     }
 
+    private boolean startsWith(String str, List<String> startList) {
+        return startList.stream().filter(s -> str.startsWith(s)).findAny().isPresent();
+    }
 
     protected void setSourceProjectLocation(File sourceProjectLocation) {
         this.sourceProjectLocation = sourceProjectLocation;

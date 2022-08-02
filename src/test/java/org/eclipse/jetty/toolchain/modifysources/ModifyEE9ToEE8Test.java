@@ -84,6 +84,13 @@ public class ModifyEE9ToEE8Test
             assertThat(sourceModified,
                     containsString("final HttpServletResponse response = org.eclipse.jetty.ee8.nested.Response.unwrap(event.getSuppliedResponse());"));
 
+
+            assertThat(sourceModified,
+                    containsString("redirectEntity(\"https://jakarta.ee/xml/ns/jakartaee/javaee_9.xsd\", jakartaee10);"));
+
+            assertThat(sourceModified,
+                    containsString("redirectEntity(\"http://jakarta.ee/xml/ns/jakartaee/javaee_9.xsd\", jakartaee10);"));
+
             assertThat(sourceModified, containsString("if (!javax.servlet.Filter.class.isAssignableFrom(getHeldClass())) {"));
         }
 

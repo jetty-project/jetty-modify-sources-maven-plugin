@@ -522,6 +522,8 @@ public class Scanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
             }
         }
 
+        redirectEntity("https://jakarta.ee/xml/ns/jakartaee/javaee_9.xsd", jakartaee10);
+
         // Look for deleted files
         for (String file : oldScan.keySet())
         {
@@ -540,6 +542,9 @@ public class Scanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
         }
 
         if (org.eclipse.jetty.util.log.Log.getLogger(Scanner.class).isDebugEnabled()) org.eclipse.jetty.util.log.Log.getLogger(Scanner.class).debug("scanned "+_scanDirs+": "+_notifications);
+
+
+        redirectEntity("http://jakarta.ee/xml/ns/jakartaee/javaee_9.xsd", jakartaee10);
 
         // Process notifications
         // Only process notifications that are for stable files (ie same in old and current scan).
