@@ -93,10 +93,10 @@ public class ModifyEE9ToEE8
     protected MavenProject project;
 
     /**
-     * this is the jakarta ee namespace and it must not be modified in constant, String
+     * this is a list of String to not translate if starting with
      */
     @Parameter
-    protected List<String> jakartaNs = Arrays.asList("https://jakarta.ee/xml/ns/", "http://jakarta.ee/xml/ns/");
+    protected List<String> notTranslateStartsWith = Arrays.asList("https://jakarta.ee/xml/ns/", "http://jakarta.ee/xml/ns/");
 
 
     public void execute()
@@ -210,7 +210,7 @@ public class ModifyEE9ToEE8
 
                         @Override
                         public Visitable visit(StringLiteralExpr n, Void arg) {
-                            if (startsWith(n.getValue(), jakartaNs)) {
+                            if (startsWith(n.getValue(), notTranslateStartsWith)) {
                                 return super.visit(n, arg);
                             }
                             if(StringUtils.contains(n.getValue(), "jakarta")) {
