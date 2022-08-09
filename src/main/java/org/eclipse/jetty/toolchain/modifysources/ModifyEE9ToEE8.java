@@ -117,6 +117,8 @@ public class ModifyEE9ToEE8
             return;
         }
 
+        getLog().info("Transforming sources from " + sourceProjectLocation + " to " + outputDirectory);
+
         try
         {
 
