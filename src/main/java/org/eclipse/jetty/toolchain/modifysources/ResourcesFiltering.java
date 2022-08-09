@@ -81,6 +81,10 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
                     content = StringUtils.replace(content, "https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd",
                             "http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd");
 
+
+                    content = StringUtils.replace(content, "https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-fragment_5_0.xsd",
+                            "http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-fragment_4_0.xsd");
+
                     content = StringUtils.replace(content, "https://jakarta.ee/xml/ns/jakartaee",
                             "http://xmlns.jcp.org/xml/ns/javaee");
 

@@ -69,7 +69,7 @@ public class ModifyEE9ToEE8ServiceLoaderFiles
                     String newFileName = changeEE9TypeToEE8(fileName);
                     File newFile = new File(metaInfDirectory, newFileName == null ? fileName : newFileName);
                     List<String> newContent = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8).
-                            stream().map(ModifyEE9ToEE8::changeEE9TypeToEE8).collect(Collectors.toList());
+                            stream().map(s -> mapFileName(s)).collect(Collectors.toList());
                     Files.write(newFile.toPath(), newContent, StandardCharsets.UTF_8);
                     if (newFileName != null) {
                         Files.delete(file.toPath());
@@ -83,6 +83,11 @@ public class ModifyEE9ToEE8ServiceLoaderFiles
             throw new MojoExecutionException("fail to modify jetty sources", e);
         }
 
+    }
+
+    private String mapFileName(String className) {
+        String newType = ModifyEE9ToEE8.changeEE9TypeToEE8(className);
+        return newType == null ? className : newType;
     }
 
     public void setOutputDirectory(File outputDirectory) {
