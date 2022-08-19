@@ -11,6 +11,9 @@
 
   <name>jetty-modify-sources-maven-plugin Maven Plugin</name>
 
+  <url>https://github.com/jetty-project/${project.artifactId}</url>
+
+  <description>Maven Plugin used for Jetty 12 to transform sources and resources using jakarta namespace to EE8 javax namespace</description>
   <prerequisites>
     <maven>3.8.2</maven>
   </prerequisites>
@@ -22,11 +25,11 @@
   <licenses>
     <license>
       <name>Eclipse Public License - Version 1.0</name>
-      <url>http://www.eclipse.org/org/documents/epl-v10.php</url>
+      <url>https://www.eclipse.org/org/documents/epl-v10.php</url>
     </license>
     <license>
       <name>Apache Software License - Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
 
@@ -47,6 +50,17 @@
     <maven.compiler.target>11</maven.compiler.target>
     <maven.version>3.8.6</maven.version>
   </properties>
+
+  <developers>
+    <developer>
+      <id>olamy</id>
+      <name>Olivier Lamy</name>
+      <email>oliver.lamy@gmail.com</email>
+      <organization>Webtide, LLC</organization>
+      <organizationUrl>https://webtide.com</organizationUrl>
+      <timezone>Australia/Brisbane</timezone>
+    </developer>
+  </developers>
 
   <distributionManagement>
     <repository>
