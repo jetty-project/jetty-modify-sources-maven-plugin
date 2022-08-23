@@ -91,6 +91,7 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
                     content = StringUtils.replace(content, "jakarta.", "javax.");
                     content = StringUtils.replace(content, "jakarta/", "javax/");
                     content = StringUtils.replace(content, "ee9", "ee8");
+                    content = StringUtils.replace(content, "EE9", "EE8");
 
                     content = StringUtils.replace(content, "version=\"5.0\"",
                             "version=\"4.0\"");
