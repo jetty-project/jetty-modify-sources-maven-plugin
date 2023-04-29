@@ -75,7 +75,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  *
  */
 @ManagedObject("EE9 Context")
-public class Scanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
+public class JakartaScanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
 {
     private static int __scannerId=0;
     private int _scanInterval;

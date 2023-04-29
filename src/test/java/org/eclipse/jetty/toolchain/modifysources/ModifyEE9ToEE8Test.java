@@ -58,7 +58,7 @@ public class ModifyEE9ToEE8Test
         assertThat(outputDirectory, anExistingDirectory());
 
         {
-            Path modified = Paths.get(outputDirectory.toString(), "org", "eclipse", "jetty", "ee8", "javax", "nested", "JakartaScanner.java");
+            Path modified = Paths.get(outputDirectory.toString(), "org", "eclipse", "jetty", "ee8", "javax", "nested", "JavaxScanner.java");
             assertThat(modified.toFile(), anExistingFile());
 
             String sourceModified = new String(Files.readAllBytes(modified));

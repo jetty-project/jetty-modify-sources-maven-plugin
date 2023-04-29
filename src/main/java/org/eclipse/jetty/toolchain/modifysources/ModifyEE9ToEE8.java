@@ -44,8 +44,12 @@ import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -119,12 +123,13 @@ public class ModifyEE9ToEE8
 
         getLog().info("Transforming sources from " + sourceProjectLocation + " to " + outputDirectory);
 
+        List<CompilationUnit> compilationUnitsToRename = new ArrayList<>();
+
         try
         {
 
             SourceRoot sourceRoot = new SourceRoot(sourceProjectLocation.toPath());
             sourceRoot.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
-            //sourceRoot.
 
             // Our sample is in the root of this directory, so no package name.
             List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse( "" );
@@ -134,6 +139,8 @@ public class ModifyEE9ToEE8
             {
                 Files.walk(out).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             }
+
+            Files.createDirectories(out);
 
             for (ParseResult<CompilationUnit> parseResult : parseResults) {
                 CompilationUnit cu = parseResult.getResult().get();
@@ -366,9 +373,15 @@ public class ModifyEE9ToEE8
 
                     }, null );
 
+
+                if (cu.getPrimaryTypeName().isPresent() && cu.getPrimaryTypeName().get().startsWith("Jakarta")
+                        && cu.getPackageDeclaration().get().getName().toString().startsWith("org.eclipse.jetty.ee8")) {
+
+                    compilationUnitsToRename.add(cu);
+                }
+
             }
 
-            Files.createDirectories(out);
             sourceRoot.saveAll(out);
 
             File ee9Directory = new File(outputDirectory, "org/eclipse/jetty/ee9");
@@ -389,6 +402,30 @@ public class ModifyEE9ToEE8
                     }
                 });
             }
+
+            for (CompilationUnit cu : compilationUnitsToRename) {
+
+                // at this stage everything has been renamed but the old file will be still save as we cannot change that
+                String previousPackage = cu.getPackageDeclaration().get().getName().toString();
+                String previousFullClassName = previousPackage + "." + cu.getPrimaryTypeName().get();
+                String fullClassName = previousPackage + "." + //
+                        StringUtils.replaceFirst(cu.getPrimaryTypeName().get(), "Jakarta", "Javax");
+                String className = StringUtils.replaceFirst(cu.getPrimaryTypeName().get(), "Jakarta", "Javax");
+                cu.getPrimaryType().get().setName(className);
+                //cu.getPrimaryType().get().setN .findAll(ClassOrInterfaceDeclaration.class).forEach(cu -> System.out.println(cu.getNameAsString()))
+
+                Path newPath = out.resolve(fullClassName.replace('.', '/') + ".java");
+
+                String newClassSource = cu.toString();
+
+                Files.createDirectories(newPath.getParent());
+                Files.createFile(newPath);
+                Files.write(newPath, newClassSource.getBytes(StandardCharsets.UTF_8));
+
+                Path oldPath = out.resolve(previousFullClassName.replace('.', '/') + ".java");
+                Files.deleteIfExists(oldPath);
+            }
+
 
             if (addToCompileSourceRoot) {
                 if (testSources) {
