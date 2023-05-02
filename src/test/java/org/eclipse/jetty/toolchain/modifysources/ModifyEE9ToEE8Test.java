@@ -110,6 +110,12 @@ public class ModifyEE9ToEE8Test
 
             assertThat(sourceModifiedModuleInfo, containsString("requires static javax.mail.glassfish;"));
         }
+
+        {
+            Path modified = Paths.get(outputDirectory.toString(), "org", "eclipse", "jetty", "ee8", "websocket", "javax", "common", "JavaxWebSocketFrameHandler.java");
+
+            assertThat(modified.toFile(), anExistingFile());
+        }
     }
 
 }

@@ -32,6 +32,8 @@ module org.eclipse.jetty.ee9.annotations
 
     exports org.eclipse.jetty.ee9.websocket.jakarta.client.internal to org.eclipse.jetty.ee9.websocket.jakarta.server;
 
+    provides jakarta.websocket.ContainerProvider with org.eclipse.jetty.ee8.websocket.javax.client.JakartaWebSocketClientContainerProvider;
+
     requires static jakarta.mail;
 
 }
