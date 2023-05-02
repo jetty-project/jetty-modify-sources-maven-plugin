@@ -109,12 +109,25 @@ public class ModifyEE9ToEE8Test
                     containsString("exports org.eclipse.jetty.ee8.websocket.javax.client.internal to org.eclipse.jetty.ee8.websocket.javax.server;"));
 
             assertThat(sourceModifiedModuleInfo, containsString("requires static javax.mail.glassfish;"));
+
+            assertThat(sourceModifiedModuleInfo,
+                    containsString("provides javax.websocket.ContainerProvider with org.eclipse.jetty.ee8.websocket.javax.client.JavaxWebSocketClientContainerProvider;"));
         }
 
         {
             Path modified = Paths.get(outputDirectory.toString(), "org", "eclipse", "jetty", "ee8", "websocket", "javax", "common", "JavaxWebSocketFrameHandler.java");
-
             assertThat(modified.toFile(), anExistingFile());
+            String sourceModified = new String(Files.readAllBytes(modified));
+            assertThat(sourceModified, containsString("package org.eclipse.jetty.ee8.websocket.javax.common;"));
+            assertThat(sourceModified, containsString("private static final Logger LOG = LoggerFactory.getLogger(JavaxWebSocketFrameHandler.class);"));
+            assertThat(sourceModified, containsString("private final List<JavaxWebSocketSessionListener> sessionListeners = new ArrayList<>();"));
+            assertThat(sourceModified, containsString("private JavaxWebSocketMessageMetadata textMetadata;"));
+            assertThat(sourceModified, containsString("private JavaxWebSocketMessageMetadata textMetadata;"));
+
+            assertThat(sourceModified,
+                    containsString("JavaxWebSocketMessageMetadata actualTextMetadata = JavaxWebSocketMessageMetadata.copyOf(textMetadata);"));
+            assertThat(sourceModified,
+                    containsString("HttpClient httpClient = (HttpClient) servletContext.getAttribute(JavaxWebSocketServletContainerInitializer.HTTPCLIENT_ATTRIBUTE);"));
         }
     }
 

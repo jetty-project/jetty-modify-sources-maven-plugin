@@ -6,7 +6,7 @@
 
   <groupId>org.eclipse.jetty.toolchain</groupId>
   <artifactId>jetty-modify-sources-maven-plugin</artifactId>
-  <version>1.0.3-rename-to-javax-SNAPSHOT</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>jetty-modify-sources-maven-plugin Maven Plugin</name>
