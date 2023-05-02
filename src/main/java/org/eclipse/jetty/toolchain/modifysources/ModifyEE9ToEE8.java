@@ -196,6 +196,13 @@ public class ModifyEE9ToEE8
                                     })
                 );
 
+                cu.findAll(NameExpr.class).stream()
+                        .filter(nameExpr -> nameExpr.getNameAsString().startsWith("Jakarta"))
+                        .forEach(nameExpr -> {
+                            String className = nameExpr.getNameAsString();
+                            nameExpr.setName(className.replaceFirst("Jakarta", "Javax"));
+                        });
+
                 cu.accept(
                     new ModifierVisitor<Void>()
                     {
@@ -251,8 +258,6 @@ public class ModifyEE9ToEE8
                                 }
                             }
                             if(StringUtils.contains(fullString, "Jakarta") && n.getScope().isPresent()){
-                                Expression expression = n.getScope().get();
-
 
                                 n.getArguments().stream().filter(node -> node instanceof NodeWithSimpleName)
                                         .map(node -> (NodeWithSimpleName<?>)node)
@@ -271,6 +276,14 @@ public class ModifyEE9ToEE8
                                             if(fullClassName.startsWith("Jakarta")) {
                                                 nameExpr.setName(fullClassName.replaceFirst("Jakarta", "Javax"));
                                             }
+                                        });
+
+                                n.getChildNodes().stream().filter(node -> node instanceof NameExpr)
+                                        .map(node -> (NameExpr)node)
+                                        .filter(nameExpr -> nameExpr.getNameAsString().startsWith("Jakarta"))
+                                        .forEach(nameExpr -> {
+                                            String className = nameExpr.getNameAsString();
+                                            nameExpr.setName(className.replaceFirst("Jakarta", "Javax"));
                                         });
 
                                 n.getChildNodes().stream().filter(node -> node instanceof ClassExpr)
@@ -463,8 +476,8 @@ public class ModifyEE9ToEE8
                     }, null );
 
 
-                if (cu.getPrimaryTypeName().isPresent() && cu.getPrimaryTypeName().get().startsWith("Jakarta")
-                        && cu.getPackageDeclaration().get().getName().toString().startsWith("org.eclipse.jetty.ee8")) {
+                if (cu.getPrimaryTypeName().isPresent() && cu.getPrimaryTypeName().get().startsWith("Jakarta")) {
+                        //&& cu.getPackageDeclaration().get().getName().toString().startsWith("org.eclipse.jetty.ee8")) {
                     compilationUnitsToRename.add(cu);
                 }
 

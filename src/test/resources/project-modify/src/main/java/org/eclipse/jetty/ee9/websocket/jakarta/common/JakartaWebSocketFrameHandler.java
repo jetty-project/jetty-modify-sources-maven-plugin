@@ -94,6 +94,7 @@ public class JakartaWebSocketFrameHandler implements FrameHandler
                                         EndpointConfig endpointConfig)
     {
 
+        JakartaWebSocketMessageMetadata actualTextMetadata = JakartaWebSocketMessageMetadata.copyOf(textMetadata);
         HttpClient httpClient = (HttpClient)servletContext.getAttribute(JakartaWebSocketServletContainerInitializer.HTTPCLIENT_ATTRIBUTE);
 
         this.logger = LoggerFactory.getLogger(endpointInstance.getClass());
