@@ -9,6 +9,9 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.expr.CastExpr;
@@ -28,8 +31,10 @@ import com.github.javaparser.ast.modules.ModuleProvidesDirective;
 import com.github.javaparser.ast.modules.ModuleRequiresDirective;
 import com.github.javaparser.ast.modules.ModuleUsesDirective;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.nodeTypes.NodeWithType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.utils.SourceRoot;
@@ -44,8 +49,12 @@ import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -119,12 +128,13 @@ public class ModifyEE9ToEE8
 
         getLog().info("Transforming sources from " + sourceProjectLocation + " to " + outputDirectory);
 
+        List<CompilationUnit> compilationUnitsToRename = new ArrayList<>();
+
         try
         {
 
             SourceRoot sourceRoot = new SourceRoot(sourceProjectLocation.toPath());
             sourceRoot.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
-            //sourceRoot.
 
             // Our sample is in the root of this directory, so no package name.
             List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse( "" );
@@ -135,8 +145,63 @@ public class ModifyEE9ToEE8
                 Files.walk(out).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             }
 
+            Files.createDirectories(out);
+
             for (ParseResult<CompilationUnit> parseResult : parseResults) {
                 CompilationUnit cu = parseResult.getResult().get();
+
+                // as the classes with names started with Jakarta will be renamed to Javax we need to rename all usage of those classes
+                cu.findAll(VariableDeclarator.class).forEach(vd -> {
+                    if (vd.getType() instanceof ClassOrInterfaceType) {
+                        String nameAsString = ((ClassOrInterfaceType)vd.getType()).getNameAsString();
+                        if (nameAsString.startsWith("Jakarta")) {
+                            ((ClassOrInterfaceType)vd.getType()).setName(nameAsString.replaceFirst("Jakarta", "Javax"));
+                        }
+                    }
+                    if (StringUtils.equals(vd.getNameAsString(), "SERVLET_MAJOR_VERSION")) {
+                        vd.setInitializer(new IntegerLiteralExpr("4"));
+                    }
+                    //changeEE9TypeToEE8(vd);
+                });
+
+                cu.findAll(ConstructorDeclaration.class).forEach(cd -> {
+                    String typeName = cd.getNameAsString();
+                    if(typeName.startsWith("Jakarta")) {
+                        cd.setName(typeName.replaceFirst("Jakarta", "Javax"));
+                    }
+                    cd.getParameters().forEach(parameter -> {
+                        if(parameter.getType() instanceof ClassOrInterfaceType) {
+                            ClassOrInterfaceType cit = ((ClassOrInterfaceType)parameter.getType());
+                            String name = cit.getNameAsString();
+                            if(name.startsWith("Jakarta")) {
+                                cit.setName(name.replaceFirst("Jakarta", "Javax"));
+                            }
+                        }
+                    });
+                });
+
+                cu.findAll(FieldDeclaration.class).stream()
+                        .filter(fd -> fd.getVariables().get(0).getType() instanceof ClassOrInterfaceType)
+                        .map(fd -> (ClassOrInterfaceType) fd.getVariables().get(0).getType())
+                        .filter(cif -> cif.getTypeArguments().isPresent())
+                        .forEach(cif ->
+                            cif.getTypeArguments().get().stream()
+                                    .filter(type -> type instanceof ClassOrInterfaceType)
+                                    .map(type -> (ClassOrInterfaceType) type)
+                                    .forEach(classOrInterfaceType -> {
+                                        String currentName = classOrInterfaceType.getNameAsString();
+                                        if (currentName.startsWith("Jakarta")) {
+                                            classOrInterfaceType.setName(currentName.replaceFirst("Jakarta", "Javax"));
+                                        }
+                                    })
+                );
+
+                cu.findAll(NameExpr.class).stream()
+                        .filter(nameExpr -> nameExpr.getNameAsString().startsWith("Jakarta"))
+                        .forEach(nameExpr -> {
+                            String className = nameExpr.getNameAsString();
+                            nameExpr.setName(className.replaceFirst("Jakarta", "Javax"));
+                        });
 
                 cu.accept(
                     new ModifierVisitor<Void>()
@@ -160,14 +225,7 @@ public class ModifyEE9ToEE8
                             return super.visit(n, arg);
                         }
 
-                        @Override
-                        public Visitable visit(VariableDeclarator n, Void arg) {
-                            if (StringUtils.equals(n.getNameAsString(), "SERVLET_MAJOR_VERSION")) {
-                               n.setInitializer(new IntegerLiteralExpr("4"));
-                            }
-                            changeEE9TypeToEE8(n);
-                            return super.visit(n, arg);
-                        }
+
 
                         @Override
                         public Visitable visit(VariableDeclarationExpr n, Void arg) {
@@ -181,9 +239,9 @@ public class ModifyEE9ToEE8
 
                         @Override
                         public Visitable visit(MethodCallExpr n, Void arg) {
-                            if(StringUtils.startsWith(n.toString(), "org.eclipse.jetty.ee9.") && n.getScope().isPresent()) {
+                            String fullString = n.toString();
+                            if(StringUtils.startsWith(fullString, "org.eclipse.jetty.ee9.") && n.getScope().isPresent()) {
                                 // org.eclipse.jetty.ee9.nested.Response.unwrap(event.getSuppliedResponse())
-                                String fullString = n.toString();
                                 Expression expression = n.getScope().get();
                                 if(expression.isFieldAccessExpr()) {
                                     FieldAccessExpr fieldAccessExpr = expression.asFieldAccessExpr();
@@ -198,7 +256,43 @@ public class ModifyEE9ToEE8
                                     NameExpr nameExpr = new NameExpr(ee8PackageName + "." + classSimpleName);
                                     n.setScope(nameExpr);
                                 }
+                            }
+                            if(StringUtils.contains(fullString, "Jakarta") && n.getScope().isPresent()){
 
+                                n.getArguments().stream().filter(node -> node instanceof NodeWithSimpleName)
+                                        .map(node -> (NodeWithSimpleName<?>)node)
+                                        .filter(nameExpr -> nameExpr.getNameAsString().startsWith("Jakarta"))
+                                        .forEach(nameExpr -> {
+                                            String className = nameExpr.getNameAsString();
+                                            nameExpr.setName(className.replaceFirst("Jakarta", "Javax"));
+                                        });
+
+                                n.getChildNodes().stream().filter(node -> node instanceof FieldAccessExpr)
+                                        .map(node -> (FieldAccessExpr)node)
+                                        .filter(fieldAccessExpr -> fieldAccessExpr.getScope().isNameExpr())
+                                        .map(nameExpr -> (NameExpr)nameExpr.getScope())
+                                        .forEach(nameExpr -> {
+                                            String fullClassName = nameExpr.getNameAsString();
+                                            if(fullClassName.startsWith("Jakarta")) {
+                                                nameExpr.setName(fullClassName.replaceFirst("Jakarta", "Javax"));
+                                            }
+                                        });
+
+                                n.getChildNodes().stream().filter(node -> node instanceof NameExpr)
+                                        .map(node -> (NameExpr)node)
+                                        .filter(nameExpr -> nameExpr.getNameAsString().startsWith("Jakarta"))
+                                        .forEach(nameExpr -> {
+                                            String className = nameExpr.getNameAsString();
+                                            nameExpr.setName(className.replaceFirst("Jakarta", "Javax"));
+                                        });
+
+                                n.getChildNodes().stream().filter(node -> node instanceof ClassExpr)
+                                        .map(node -> (ClassExpr)node)
+                                        .filter(classExpr -> classExpr.getTypeAsString().startsWith("Jakarta"))
+                                        .forEach(classExpr -> {
+                                            String className = classExpr.getTypeAsString();
+                                            classExpr.setType(className.replaceFirst("Jakarta", "Javax"));
+                                        });
                             }
                             return super.visit(n, arg);
                         }
@@ -206,6 +300,41 @@ public class ModifyEE9ToEE8
                         @Override
                         public Visitable visit(ClassExpr n, Void arg) {
                             changeEE9TypeToEE8(n);
+                            return super.visit(n, arg);
+                        }
+
+                        @Override
+                        public Visitable visit(ClassOrInterfaceDeclaration n, Void arg) {
+                            return super.visit(n, arg);
+                        }
+
+                        @Override
+                        public Visitable visit(ClassOrInterfaceType n, Void arg) {
+                            String currentName = n.toString();
+                            JavaParser javaParser = new JavaParser();
+
+                            if (currentName.startsWith("org.eclipse.jetty.ee9.")) {
+                                String newName = StringUtils.replace(currentName, "org.eclipse.jetty.ee9.", "org.eclipse.jetty.ee8.");
+                                ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
+                                if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
+                                    n = parseResult.getResult().get();
+                                }
+
+                            }
+                            if (currentName.contains("jakarta")) {
+                                String newName = StringUtils.replace(currentName, "jakarta", "javax");
+                                ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
+                                if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
+                                    n = parseResult.getResult().get();
+                                }
+                            }
+                            if(currentName.startsWith("Jakarta")) {
+                                String newName = StringUtils.replace(currentName, "Jakarta", "Javax");
+                                ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
+                                if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
+                                    n = parseResult.getResult().get();
+                                }
+                            }
                             return super.visit(n, arg);
                         }
 
@@ -309,6 +438,13 @@ public class ModifyEE9ToEE8
                                         .forEach(name -> name.setQualifier(new Name(StringUtils.replace(name.getQualifier().get().asString(),
                                                 ".jakarta",
                                                 ".javax"))));
+                                n.getWith().stream()
+                                        .filter(name -> StringUtils.contains(name.getIdentifier(),"Jakarta"))
+                                        .forEach(name -> name.setIdentifier(StringUtils.replace(name.getIdentifier(),
+                                                "Jakarta",
+                                                "Javax")));
+
+
                             }
                             return super.visit(n, arg);
                         }
@@ -331,44 +467,23 @@ public class ModifyEE9ToEE8
                             if (StringUtils.contains(n.getContent(), "jakarta")) {
                                 n.setContent(StringUtils.replace(n.getContent(),"jakarta", "javax"));
                             }
-                            return super.visit(n, arg);
-                        }
-
-                        @Override
-                        public Visitable visit(ClassOrInterfaceDeclaration n, Void arg) {
-                            return super.visit(n, arg);
-                        }
-
-                        @Override
-                        public Visitable visit(ClassOrInterfaceType n, Void arg) {
-                            String currentName = n.toString();
-                            JavaParser javaParser = new JavaParser();
-
-                            if (currentName.startsWith("org.eclipse.jetty.ee9.")) {
-                                String newName = StringUtils.replace(currentName, "org.eclipse.jetty.ee9.", "org.eclipse.jetty.ee8.");
-                                ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
-                                if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
-                                    n = parseResult.getResult().get();
-                                }
-
-                            }
-                            if (currentName.contains("jakarta")) {
-                                String newName = StringUtils.replace(currentName, "jakarta", "javax");
-                                ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
-                                if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
-                                    n = parseResult.getResult().get();
-                                }
+                            if (StringUtils.contains(n.getContent(), "Jakarta")) {
+                                n.setContent(StringUtils.replace(n.getContent(),"Jakarta", "Javax"));
                             }
                             return super.visit(n, arg);
                         }
-
-
 
                     }, null );
 
+
+                if (cu.getPrimaryTypeName().isPresent() && cu.getPrimaryTypeName().get().startsWith("Jakarta")) {
+                    // we cannot as we have some demo packages as well
+                        //&& cu.getPackageDeclaration().get().getName().toString().startsWith("org.eclipse.jetty.ee8")) {
+                    compilationUnitsToRename.add(cu);
+                }
+
             }
 
-            Files.createDirectories(out);
             sourceRoot.saveAll(out);
 
             File ee9Directory = new File(outputDirectory, "org/eclipse/jetty/ee9");
@@ -388,6 +503,28 @@ public class ModifyEE9ToEE8
                         throw new RuntimeException(e);
                     }
                 });
+            }
+
+            for (CompilationUnit cu : compilationUnitsToRename) {
+
+                // at this stage everything has been renamed but the old file will be still save as we cannot change that
+                String previousPackage = cu.getPackageDeclaration().get().getName().toString();
+                String previousFullClassName = previousPackage + "." + cu.getPrimaryTypeName().get();
+                String fullClassName = previousPackage + "." + //
+                        StringUtils.replaceFirst(cu.getPrimaryTypeName().get(), "Jakarta", "Javax");
+                String className = StringUtils.replaceFirst(cu.getPrimaryTypeName().get(), "Jakarta", "Javax");
+                cu.getPrimaryType().get().setName(className);
+
+                Path newPath = out.resolve(fullClassName.replace('.', '/') + ".java");
+
+                String newClassSource = cu.toString();
+
+                Files.createDirectories(newPath.getParent());
+                Files.createFile(newPath);
+                Files.write(newPath, newClassSource.getBytes(StandardCharsets.UTF_8));
+
+                Path oldPath = out.resolve(previousFullClassName.replace('.', '/') + ".java");
+                Files.deleteIfExists(oldPath);
             }
 
             if (addToCompileSourceRoot) {
@@ -431,6 +568,7 @@ public class ModifyEE9ToEE8
      * @return will return <code>null</code> if there is nothing to change
      */
     public static String changeEE9TypeToEE8(String currentType) {
+        currentType = currentType.replaceFirst("Jakarta", "Javax");
         if (currentType.contains("jakarta")) {
             String newType = StringUtils.replace(currentType, "jakarta",
                     "javax");
@@ -448,7 +586,7 @@ public class ModifyEE9ToEE8
         return null;
     }
 
-    private boolean startsWith(String str, Collection<String> startList) {
+    private static boolean startsWith(String str, Collection<String> startList) {
         return startList.stream().anyMatch(str::startsWith);
     }
 
