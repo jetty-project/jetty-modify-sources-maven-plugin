@@ -346,6 +346,9 @@ public class ModifyEE9ToEE8
                             if(StringUtils.contains(n.getValue(), "jakarta")) {
                                 n.setString(StringUtils.replace(n.getValue(), "jakarta", "javax"));
                             }
+                            if(StringUtils.contains(n.getValue(), "Jakarta")) {
+                                n.setString(StringUtils.replace(n.getValue(), "Jakarta", "Javax"));
+                            }
                             if(StringUtils.contains(n.getValue(), "jetty-ee9")) {
                                 n.setString(StringUtils.replace(n.getValue(), "jetty-ee9", "jetty-ee8"));
                             }
