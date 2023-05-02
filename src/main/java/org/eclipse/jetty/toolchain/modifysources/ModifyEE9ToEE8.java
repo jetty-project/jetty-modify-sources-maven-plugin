@@ -477,6 +477,7 @@ public class ModifyEE9ToEE8
 
 
                 if (cu.getPrimaryTypeName().isPresent() && cu.getPrimaryTypeName().get().startsWith("Jakarta")) {
+                    // we cannot as we have some demo packages as well
                         //&& cu.getPackageDeclaration().get().getName().toString().startsWith("org.eclipse.jetty.ee8")) {
                     compilationUnitsToRename.add(cu);
                 }
