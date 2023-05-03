@@ -124,6 +124,9 @@ public class ModifyEE9ToEE8Test
             assertThat(sourceModified, containsString("private JavaxWebSocketMessageMetadata textMetadata;"));
             assertThat(sourceModified, containsString("private JavaxWebSocketMessageMetadata textMetadata;"));
 
+            assertThat(sourceModified, containsString("int permits = _passes == null ? 0 : _passes.availablePermits();"));
+            assertThat(sourceModified, containsString("_passes = new Semaphore((value - _throttledRequests + permits), true);"));
+
             assertThat(sourceModified,
                     containsString("JavaxWebSocketMessageMetadata actualTextMetadata = JavaxWebSocketMessageMetadata.copyOf(textMetadata);"));
             assertThat(sourceModified,

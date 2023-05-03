@@ -49,6 +49,7 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <maven.version>3.8.7</maven.version>
+    <javaparser.version>3.25.2</javaparser.version>
   </properties>
 
   <developers>
@@ -79,7 +80,7 @@
     <dependency>
       <groupId>com.github.javaparser</groupId>
       <artifactId>javaparser-core</artifactId>
-      <version>3.25.3</version>
+      <version>${javaparser.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>

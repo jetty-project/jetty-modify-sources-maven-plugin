@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -116,6 +117,13 @@ public class JakartaWebSocketFrameHandler implements FrameHandler
         this.pongHandle = pongHandle;
 
         this.endpointConfig = endpointConfig;
+    }
+
+    public void setThrottledRequests(int value)
+    {
+        int permits = _passes == null ? 0 : _passes.availablePermits();
+        _passes = new Semaphore((value - _throttledRequests + permits), true);
+        _throttledRequests = value;
     }
 
     public Object getEndpoint()
