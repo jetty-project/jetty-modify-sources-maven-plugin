@@ -49,6 +49,7 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <maven.version>3.8.7</maven.version>
+    <!-- no upgrade until this issue fixed https://github.com/javaparser/javaparser/issues/4018 -->
     <javaparser.version>3.25.2</javaparser.version>
   </properties>
 
