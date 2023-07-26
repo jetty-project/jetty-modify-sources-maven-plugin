@@ -41,23 +41,6 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
         super(new JettyMavenFileFilter(buildContext), buildContext);
     }
 
-    @Override
-    public boolean filteredFileExtension(String fileName, List<String> userNonFilteredFileExtensions) {
-        String ext = getExtension(fileName);
-        return ext == null? false : Arrays.asList("xml", "properties", "txt").contains(ext);
-    }
-
-    private static String getExtension( String fileName )
-    {
-        String rawExt = FilenameUtils.getExtension(fileName);
-        return rawExt == null ? null : rawExt.toLowerCase(Locale.ROOT);
-    }
-
-    @Override
-    public void filterResources(MavenResourcesExecution mavenResourcesExecution) throws MavenFilteringException {
-        super.filterResources(mavenResourcesExecution);
-    }
-
     public static class JettyMavenFileFilter extends DefaultMavenFileFilter implements MavenFileFilter {
 
         private BuildContext buildContext;
