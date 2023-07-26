@@ -33,7 +33,7 @@
             <nonFilteredFileExtension>tga</nonFilteredFileExtension>
             <nonFilteredFileExtension>zip</nonFilteredFileExtension>
             <nonFilteredFileExtension>gz</nonFilteredFileExtension>
-            <nonFilteredFileExtension>tif</nonFilteredFileExtension>
+            <nonFilteredFileExtension>gif</nonFilteredFileExtension>
             <nonFilteredFileExtension>tiff</nonFilteredFileExtension>
             <nonFilteredFileExtension>svgz</nonFilteredFileExtension>
             <nonFilteredFileExtension>jp2</nonFilteredFileExtension>
@@ -71,6 +71,10 @@
                 <resource>
                   <filtering>true</filtering>
                   <directory>src/main/config</directory>
+                </resource>
+                <resource>
+                  <filtering>true</filtering>
+                  <directory>src/main/webapp</directory>
                 </resource>
               </resources>
             </configuration>
