@@ -1,13 +1,11 @@
 package org.eclipse.jetty.toolchain.modifysources;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.shared.filtering.DefaultMavenFileFilter;
 import org.apache.maven.shared.filtering.DefaultMavenResourcesFiltering;
 import org.apache.maven.shared.filtering.FilterWrapper;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
-import org.apache.maven.shared.filtering.MavenResourcesExecution;
 import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 @Singleton
 @Named("ee9-to-ee8")
@@ -73,6 +69,7 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
 
                     content = StringUtils.replace(content, "jakarta.", "javax.");
                     content = StringUtils.replace(content, "jakarta/", "javax/");
+                    content = StringUtils.replace(content, "Jakarta", "Javax");
                     content = StringUtils.replace(content, "ee9", "ee8");
                     content = StringUtils.replace(content, "EE9", "EE8");
 
