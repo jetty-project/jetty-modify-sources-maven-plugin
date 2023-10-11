@@ -473,6 +473,9 @@ public class ModifyEE9ToEE8
                             if (StringUtils.contains(n.getContent(), "Jakarta")) {
                                 n.setContent(StringUtils.replace(n.getContent(),"Jakarta", "Javax"));
                             }
+                            if (StringUtils.contains(n.getContent(), "ee9")) {
+                                n.setContent(StringUtils.replace(n.getContent(),"ee9", "ee8"));
+                            }
                             return super.visit(n, arg);
                         }
 

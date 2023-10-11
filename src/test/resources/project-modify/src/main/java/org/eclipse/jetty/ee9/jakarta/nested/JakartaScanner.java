@@ -192,7 +192,9 @@ public class JakartaScanner extends org.eclipse.jetty.ee9.servlet.DecoratingList
 
     /**
      * Set the scan interval
+     *
      * @param scanInterval pause between scans in seconds, or 0 for no scan after the initial scan.
+     *
      */
     public synchronized void setScanInterval(int scanInterval)
     {
@@ -204,6 +206,21 @@ public class JakartaScanner extends org.eclipse.jetty.ee9.servlet.DecoratingList
 
     }
 
+    /**
+     * Check to see if there have been any bundle symbolic names added of bundles that should be
+     * regarded as being on the container classpath, and scanned for fragments, tlds etc etc.
+     * This can be defined in:
+     * <ol>
+     * <li>SystemProperty SYS_PROP_TLD_BUNDLES</li>
+     * <li>DeployerManager.setContextAttribute CONTAINER_BUNDLE_PATTERN</li>
+     * </ol>
+     *
+     * We also allow individual bundles to specify particular bundles that might include TLDs via the Require-Tlds
+     * MANIFEST.MF header.
+     *
+     * @see org.eclipse.jetty.ee9.webapp.WebInfConfiguration#preConfigure(org.eclipse.jetty.ee9.webapp.WebAppContext)
+     */
+    @Override
     public void setScanDirs (List<File> dirs)
     {
         _scanDirs.clear();
