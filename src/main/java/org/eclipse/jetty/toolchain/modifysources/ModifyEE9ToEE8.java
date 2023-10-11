@@ -22,6 +22,7 @@ import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.modules.ModuleDeclaration;
@@ -169,6 +170,9 @@ public class ModifyEE9ToEE8
                     if(typeName.startsWith("Jakarta")) {
                         cd.setName(typeName.replaceFirst("Jakarta", "Javax"));
                     }
+                    if(typeName.startsWith("JAKARTA")) {
+                        cd.setName(typeName.replaceFirst("JAKARTA", "JAVAX"));
+                    }
                     cd.getParameters().forEach(parameter -> {
                         if(parameter.getType() instanceof ClassOrInterfaceType) {
                             ClassOrInterfaceType cit = ((ClassOrInterfaceType)parameter.getType());
@@ -176,9 +180,26 @@ public class ModifyEE9ToEE8
                             if(name.startsWith("Jakarta")) {
                                 cit.setName(name.replaceFirst("Jakarta", "Javax"));
                             }
+                            if(name.startsWith("JAKARTA")) {
+                                cit.setName(name.replaceFirst("JAKARTA", "JAVAX"));
+                            }
                         }
                     });
                 });
+
+                cu.findAll(VariableDeclarator.class).stream()
+                        .filter(vd -> vd.getName().toString().startsWith("jakarta"))
+                                .forEach(vd -> {
+                                    String name = vd.getName().toString();
+                                    vd.setName(new SimpleName(StringUtils.replace(name,"jakarta","javax")));
+                                });
+
+                cu.findAll(VariableDeclarator.class).stream()
+                        .filter(vd -> vd.getName().toString().startsWith("JAKARTA"))
+                        .forEach(vd -> {
+                            String name = vd.getName().toString();
+                            vd.setName(new SimpleName(StringUtils.replace(name,"JAKARTA","JAVAX")));
+                        });
 
                 cu.findAll(FieldDeclaration.class).stream()
                         .filter(fd -> fd.getVariables().get(0).getType() instanceof ClassOrInterfaceType)
@@ -193,6 +214,9 @@ public class ModifyEE9ToEE8
                                         if (currentName.startsWith("Jakarta")) {
                                             classOrInterfaceType.setName(currentName.replaceFirst("Jakarta", "Javax"));
                                         }
+                                        if (currentName.startsWith("JAKARTA")) {
+                                            classOrInterfaceType.setName(currentName.replaceFirst("JAKARTA", "JAVX"));
+                                        }
                                     })
                 );
 
@@ -201,6 +225,13 @@ public class ModifyEE9ToEE8
                         .forEach(nameExpr -> {
                             String className = nameExpr.getNameAsString();
                             nameExpr.setName(className.replaceFirst("Jakarta", "Javax"));
+                        });
+
+                cu.findAll(NameExpr.class).stream()
+                        .filter(nameExpr -> nameExpr.getNameAsString().startsWith("JAKARTA"))
+                        .forEach(nameExpr -> {
+                            String className = nameExpr.getNameAsString();
+                            nameExpr.setName(className.replaceFirst("JAKARTA", "JAVAX"));
                         });
 
                 cu.accept(
@@ -257,43 +288,8 @@ public class ModifyEE9ToEE8
                                     n.setScope(nameExpr);
                                 }
                             }
-                            if(StringUtils.contains(fullString, "Jakarta") && n.getScope().isPresent()){
-
-                                n.getArguments().stream().filter(node -> node instanceof NodeWithSimpleName)
-                                        .map(node -> (NodeWithSimpleName<?>)node)
-                                        .filter(nameExpr -> nameExpr.getNameAsString().startsWith("Jakarta"))
-                                        .forEach(nameExpr -> {
-                                            String className = nameExpr.getNameAsString();
-                                            nameExpr.setName(className.replaceFirst("Jakarta", "Javax"));
-                                        });
-
-                                n.getChildNodes().stream().filter(node -> node instanceof FieldAccessExpr)
-                                        .map(node -> (FieldAccessExpr)node)
-                                        .filter(fieldAccessExpr -> fieldAccessExpr.getScope().isNameExpr())
-                                        .map(nameExpr -> (NameExpr)nameExpr.getScope())
-                                        .forEach(nameExpr -> {
-                                            String fullClassName = nameExpr.getNameAsString();
-                                            if(fullClassName.startsWith("Jakarta")) {
-                                                nameExpr.setName(fullClassName.replaceFirst("Jakarta", "Javax"));
-                                            }
-                                        });
-
-                                n.getChildNodes().stream().filter(node -> node instanceof NameExpr)
-                                        .map(node -> (NameExpr)node)
-                                        .filter(nameExpr -> nameExpr.getNameAsString().startsWith("Jakarta"))
-                                        .forEach(nameExpr -> {
-                                            String className = nameExpr.getNameAsString();
-                                            nameExpr.setName(className.replaceFirst("Jakarta", "Javax"));
-                                        });
-
-                                n.getChildNodes().stream().filter(node -> node instanceof ClassExpr)
-                                        .map(node -> (ClassExpr)node)
-                                        .filter(classExpr -> classExpr.getTypeAsString().startsWith("Jakarta"))
-                                        .forEach(classExpr -> {
-                                            String className = classExpr.getTypeAsString();
-                                            classExpr.setType(className.replaceFirst("Jakarta", "Javax"));
-                                        });
-                            }
+                            visitMethodCallExpr(n, fullString, "Jakarta", "Javax");
+                            visitMethodCallExpr(n, fullString, "JAKARTA", "JAVAX");
                             return super.visit(n, arg);
                         }
 
@@ -321,6 +317,7 @@ public class ModifyEE9ToEE8
                                 }
 
                             }
+
                             if (currentName.contains("jakarta")) {
                                 String newName = StringUtils.replace(currentName, "jakarta", "javax");
                                 ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
@@ -330,6 +327,13 @@ public class ModifyEE9ToEE8
                             }
                             if(currentName.startsWith("Jakarta")) {
                                 String newName = StringUtils.replace(currentName, "Jakarta", "Javax");
+                                ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
+                                if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
+                                    n = parseResult.getResult().get();
+                                }
+                            }
+                            if(currentName.startsWith("JAKARTA")) {
+                                String newName = StringUtils.replace(currentName, "JAKARTA", "JAVAX");
                                 ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
                                 if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
                                     n = parseResult.getResult().get();
@@ -348,6 +352,9 @@ public class ModifyEE9ToEE8
                             }
                             if(StringUtils.contains(n.getValue(), "Jakarta")) {
                                 n.setString(StringUtils.replace(n.getValue(), "Jakarta", "Javax"));
+                            }
+                            if(StringUtils.contains(n.getValue(), "JAKARTA")) {
+                                n.setString(StringUtils.replace(n.getValue(), "JAKARTA", "JAVAX"));
                             }
                             if(StringUtils.contains(n.getValue(), "jetty-ee9")) {
                                 n.setString(StringUtils.replace(n.getValue(), "jetty-ee9", "jetty-ee8"));
@@ -473,6 +480,9 @@ public class ModifyEE9ToEE8
                             if (StringUtils.contains(n.getContent(), "Jakarta")) {
                                 n.setContent(StringUtils.replace(n.getContent(),"Jakarta", "Javax"));
                             }
+                            if (StringUtils.contains(n.getContent(), "JAKARTA")) {
+                                n.setContent(StringUtils.replace(n.getContent(),"JAKARTA", "JAVAX"));
+                            }
                             return super.visit(n, arg);
                         }
 
@@ -547,6 +557,46 @@ public class ModifyEE9ToEE8
     }
 
 
+    private void visitMethodCallExpr(MethodCallExpr n, String fullString, String toReplace, String replacement) {
+        if(StringUtils.contains(fullString, toReplace) && n.getScope().isPresent()){
+
+            n.getArguments().stream().filter(node -> node instanceof NodeWithSimpleName)
+                    .map(node -> (NodeWithSimpleName<?>)node)
+                    .filter(nameExpr -> nameExpr.getNameAsString().startsWith(toReplace))
+                    .forEach(nameExpr -> {
+                        String className = nameExpr.getNameAsString();
+                        nameExpr.setName(className.replaceFirst(toReplace, replacement));
+                    });
+
+            n.getChildNodes().stream().filter(node -> node instanceof FieldAccessExpr)
+                    .map(node -> (FieldAccessExpr)node)
+                    .filter(fieldAccessExpr -> fieldAccessExpr.getScope().isNameExpr())
+                    .map(nameExpr -> (NameExpr)nameExpr.getScope())
+                    .forEach(nameExpr -> {
+                        String fullClassName = nameExpr.getNameAsString();
+                        if(fullClassName.startsWith(toReplace)) {
+                            nameExpr.setName(fullClassName.replaceFirst(toReplace, replacement));
+                        }
+                    });
+
+            n.getChildNodes().stream().filter(node -> node instanceof NameExpr)
+                    .map(node -> (NameExpr)node)
+                    .filter(nameExpr -> nameExpr.getNameAsString().startsWith(toReplace))
+                    .forEach(nameExpr -> {
+                        String className = nameExpr.getNameAsString();
+                        nameExpr.setName(className.replaceFirst(toReplace, replacement));
+                    });
+
+            n.getChildNodes().stream().filter(node -> node instanceof ClassExpr)
+                    .map(node -> (ClassExpr)node)
+                    .filter(classExpr -> classExpr.getTypeAsString().startsWith(toReplace))
+                    .forEach(classExpr -> {
+                        String className = classExpr.getTypeAsString();
+                        classExpr.setType(className.replaceFirst(replacement, replacement));
+                    });
+        }
+    }
+
     private static void changeEE9NameToEE8(NodeWithName n) {
         //org.eclipse.jetty.ee9.nested to org.eclipse.jetty.ee8.nested
         String currentName = n.getName().asString();
@@ -572,6 +622,7 @@ public class ModifyEE9ToEE8
      */
     public static String changeEE9TypeToEE8(String currentType) {
         currentType = currentType.replaceFirst("Jakarta", "Javax");
+        currentType = currentType.replaceFirst("JAKARTA", "JAVAX");
         if (currentType.contains("jakarta")) {
             String newType = StringUtils.replace(currentType, "jakarta",
                     "javax");

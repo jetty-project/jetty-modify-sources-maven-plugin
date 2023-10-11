@@ -77,6 +77,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @ManagedObject("EE9 Context")
 public class JakartaScanner extends org.eclipse.jetty.ee9.servlet.DecoratingListener
 {
+
+    public static final Source EMBEDDED = new Source(Origin.EMBEDDED);
+
+    public static final Source JAKARTA_API = new Source(Origin.JAKARTA_API);
+
+    public enum Origin {
+
+        EMBEDDED, JAKARTA_API, DESCRIPTOR, ANNOTATION
+    }
+
     private static int __scannerId=0;
     private int _scanInterval;
     private int _scanCount = 0;
