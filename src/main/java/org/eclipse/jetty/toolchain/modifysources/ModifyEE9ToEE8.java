@@ -552,8 +552,8 @@ public class ModifyEE9ToEE8
 
     private String replaceClassName(String previousClassName) {
         String className = StringUtils.replace(previousClassName, "Jakarta", "Javax");
-        className = StringUtils.replace(previousClassName, "ee9", "ee8");
-        className = StringUtils.replace(previousClassName, "EE9", "EE8");
+        className = StringUtils.replace(className, "ee9", "ee8");
+        className = StringUtils.replace(className, "EE9", "EE8");
         return className;
     }
 
