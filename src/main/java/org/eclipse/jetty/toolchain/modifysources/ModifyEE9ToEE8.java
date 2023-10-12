@@ -518,7 +518,7 @@ public class ModifyEE9ToEE8
                 String previousFullClassName = previousPackage + "." + cu.getPrimaryTypeName().get();
                 String fullClassName = previousPackage + "." + //
                         StringUtils.replaceFirst(cu.getPrimaryTypeName().get(), "Jakarta", "Javax");
-                String className = StringUtils.replaceFirst(cu.getPrimaryTypeName().get(), "Jakarta", "Javax");
+                String className = replaceClassName(cu.getPrimaryTypeName().get());
                 cu.getPrimaryType().get().setName(className);
 
                 Path newPath = out.resolve(fullClassName.replace('.', '/') + ".java");
@@ -549,6 +549,13 @@ public class ModifyEE9ToEE8
 
     }
 
+
+    private String replaceClassName(String previousClassName) {
+        String className = StringUtils.replace(previousClassName, "Jakarta", "Javax");
+        className = StringUtils.replace(previousClassName, "ee9", "ee8");
+        className = StringUtils.replace(previousClassName, "EE9", "EE8");
+        return className;
+    }
 
     private static void changeEE9NameToEE8(NodeWithName n) {
         //org.eclipse.jetty.ee9.nested to org.eclipse.jetty.ee8.nested
