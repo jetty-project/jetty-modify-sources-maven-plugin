@@ -154,8 +154,8 @@ public class ModifyEE9ToEE8
                 cu.findAll(VariableDeclarator.class).forEach(vd -> {
                     if (vd.getType() instanceof ClassOrInterfaceType) {
                         String nameAsString = ((ClassOrInterfaceType)vd.getType()).getNameAsString();
-                        if (nameAsString.startsWith("Jakarta")) {
-                            ((ClassOrInterfaceType)vd.getType()).setName(nameAsString.replaceFirst("Jakarta", "Javax"));
+                        if (nameAsString.contains("Jakarta")) {
+                            ((ClassOrInterfaceType)vd.getType()).setName(nameAsString.replace("Jakarta", "Javax"));
                         }
                     }
                     if (StringUtils.equals(vd.getNameAsString(), "SERVLET_MAJOR_VERSION")) {
@@ -166,15 +166,15 @@ public class ModifyEE9ToEE8
 
                 cu.findAll(ConstructorDeclaration.class).forEach(cd -> {
                     String typeName = cd.getNameAsString();
-                    if(typeName.startsWith("Jakarta")) {
-                        cd.setName(typeName.replaceFirst("Jakarta", "Javax"));
+                    if(typeName.contains("Jakarta")) {
+                        cd.setName(typeName.replace("Jakarta", "Javax"));
                     }
                     cd.getParameters().forEach(parameter -> {
                         if(parameter.getType() instanceof ClassOrInterfaceType) {
                             ClassOrInterfaceType cit = ((ClassOrInterfaceType)parameter.getType());
                             String name = cit.getNameAsString();
-                            if(name.startsWith("Jakarta")) {
-                                cit.setName(name.replaceFirst("Jakarta", "Javax"));
+                            if(name.contains("Jakarta")) {
+                                cit.setName(name.replace("Jakarta", "Javax"));
                             }
                         }
                     });
@@ -190,17 +190,17 @@ public class ModifyEE9ToEE8
                                     .map(type -> (ClassOrInterfaceType) type)
                                     .forEach(classOrInterfaceType -> {
                                         String currentName = classOrInterfaceType.getNameAsString();
-                                        if (currentName.startsWith("Jakarta")) {
-                                            classOrInterfaceType.setName(currentName.replaceFirst("Jakarta", "Javax"));
+                                        if (currentName.contains("Jakarta")) {
+                                            classOrInterfaceType.setName(currentName.replace("Jakarta", "Javax"));
                                         }
                                     })
                 );
 
                 cu.findAll(NameExpr.class).stream()
-                        .filter(nameExpr -> nameExpr.getNameAsString().startsWith("Jakarta"))
+                        .filter(nameExpr -> nameExpr.getNameAsString().contains("Jakarta"))
                         .forEach(nameExpr -> {
                             String className = nameExpr.getNameAsString();
-                            nameExpr.setName(className.replaceFirst("Jakarta", "Javax"));
+                            nameExpr.setName(className.replace("Jakarta", "Javax"));
                         });
 
                 cu.accept(
@@ -261,10 +261,10 @@ public class ModifyEE9ToEE8
 
                                 n.getArguments().stream().filter(node -> node instanceof NodeWithSimpleName)
                                         .map(node -> (NodeWithSimpleName<?>)node)
-                                        .filter(nameExpr -> nameExpr.getNameAsString().startsWith("Jakarta"))
+                                        .filter(nameExpr -> nameExpr.getNameAsString().contains("Jakarta"))
                                         .forEach(nameExpr -> {
                                             String className = nameExpr.getNameAsString();
-                                            nameExpr.setName(className.replaceFirst("Jakarta", "Javax"));
+                                            nameExpr.setName(className.replace("Jakarta", "Javax"));
                                         });
 
                                 n.getChildNodes().stream().filter(node -> node instanceof FieldAccessExpr)
@@ -273,25 +273,25 @@ public class ModifyEE9ToEE8
                                         .map(nameExpr -> (NameExpr)nameExpr.getScope())
                                         .forEach(nameExpr -> {
                                             String fullClassName = nameExpr.getNameAsString();
-                                            if(fullClassName.startsWith("Jakarta")) {
-                                                nameExpr.setName(fullClassName.replaceFirst("Jakarta", "Javax"));
+                                            if(fullClassName.contains("Jakarta")) {
+                                                nameExpr.setName(fullClassName.replace("Jakarta", "Javax"));
                                             }
                                         });
 
                                 n.getChildNodes().stream().filter(node -> node instanceof NameExpr)
                                         .map(node -> (NameExpr)node)
-                                        .filter(nameExpr -> nameExpr.getNameAsString().startsWith("Jakarta"))
+                                        .filter(nameExpr -> nameExpr.getNameAsString().contains("Jakarta"))
                                         .forEach(nameExpr -> {
                                             String className = nameExpr.getNameAsString();
-                                            nameExpr.setName(className.replaceFirst("Jakarta", "Javax"));
+                                            nameExpr.setName(className.replace("Jakarta", "Javax"));
                                         });
 
                                 n.getChildNodes().stream().filter(node -> node instanceof ClassExpr)
                                         .map(node -> (ClassExpr)node)
-                                        .filter(classExpr -> classExpr.getTypeAsString().startsWith("Jakarta"))
+                                        .filter(classExpr -> classExpr.getTypeAsString().contains("Jakarta"))
                                         .forEach(classExpr -> {
                                             String className = classExpr.getTypeAsString();
-                                            classExpr.setType(className.replaceFirst("Jakarta", "Javax"));
+                                            classExpr.setType(className.replace("Jakarta", "Javax"));
                                         });
                             }
                             return super.visit(n, arg);
@@ -328,7 +328,7 @@ public class ModifyEE9ToEE8
                                     n = parseResult.getResult().get();
                                 }
                             }
-                            if(currentName.startsWith("Jakarta")) {
+                            if(currentName.contains("Jakarta")) {
                                 String newName = StringUtils.replace(currentName, "Jakarta", "Javax");
                                 ParseResult<ClassOrInterfaceType> parseResult = javaParser.parseClassOrInterfaceType(newName);
                                 if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
