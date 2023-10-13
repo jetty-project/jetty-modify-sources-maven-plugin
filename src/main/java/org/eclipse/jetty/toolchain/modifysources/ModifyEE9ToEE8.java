@@ -257,6 +257,17 @@ public class ModifyEE9ToEE8
                                     n.setScope(nameExpr);
                                 }
                             }
+
+                            if(StringUtils.startsWith(fullString, "EE9") && n.getScope().isPresent()) {
+                                // org.eclipse.jetty.ee9.nested.Response.unwrap(event.getSuppliedResponse())
+                                Expression expression = n.getScope().get();
+                                if(expression.isNameExpr()) {
+                                    NameExpr nameExpr = n.getScope().get().asNameExpr();;
+                                    String oldExp = nameExpr.getNameAsString();
+                                    n.setScope(new NameExpr(oldExp.replaceFirst("EE9", "EE8")));
+                                }
+                            }
+
                             if(StringUtils.contains(fullString, "Jakarta") && n.getScope().isPresent()){
 
                                 n.getArguments().stream().filter(node -> node instanceof NodeWithSimpleName)
@@ -595,13 +606,14 @@ public class ModifyEE9ToEE8
         //org.eclipse.jetty.ee9.nested to org.eclipse.jetty.ee8.nested
         if (currentType.startsWith("org.eclipse.jetty.ee9")) {
             String newType = StringUtils.replace(currentType, "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8");
+            if(StringUtils.contains(newType, "EE9")) {
+                newType = StringUtils.replace(newType, "EE9", "EE8");
+            }
+            if(StringUtils.contains(newType, "ee9")) {
+                newType = StringUtils.replace(newType, "ee9", "ee8");
+            }
+
             return newType;
-        }
-        if(StringUtils.contains(currentType, "EE9")) {
-            return StringUtils.replace(currentType, "EE9", "EE8");
-        }
-        if(StringUtils.contains(currentType, "ee9")) {
-            return StringUtils.replace(currentType, "ee9", "ee8");
         }
         return null;
     }
