@@ -11,7 +11,6 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.expr.CastExpr;
@@ -34,7 +33,6 @@ import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.nodeTypes.NodeWithType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.utils.SourceRoot;
@@ -259,7 +257,6 @@ public class ModifyEE9ToEE8
                             }
 
                             if(StringUtils.startsWith(fullString, "EE9") && n.getScope().isPresent()) {
-                                // org.eclipse.jetty.ee9.nested.Response.unwrap(event.getSuppliedResponse())
                                 Expression expression = n.getScope().get();
                                 if(expression.isNameExpr()) {
                                     NameExpr nameExpr = n.getScope().get().asNameExpr();;
@@ -267,15 +264,22 @@ public class ModifyEE9ToEE8
                                     n.setScope(new NameExpr(oldExp.replaceFirst("EE9", "EE8")));
                                 }
                             }
+                            replaceMethodCallExpr(n, "Jakarta", "Javax");
+                            replaceMethodCallExpr(n, "EE9", "EE8");
+                            return super.visit(n, arg);
+                        }
 
-                            if(StringUtils.contains(fullString, "Jakarta") && n.getScope().isPresent()){
+
+                        private void replaceMethodCallExpr(MethodCallExpr n, String contains, String replace) {
+                            String fullString = n.toString();
+                            if(StringUtils.contains(fullString, contains) && n.getScope().isPresent()){
 
                                 n.getArguments().stream().filter(node -> node instanceof NodeWithSimpleName)
                                         .map(node -> (NodeWithSimpleName<?>)node)
-                                        .filter(nameExpr -> nameExpr.getNameAsString().contains("Jakarta"))
+                                        .filter(nameExpr -> nameExpr.getNameAsString().contains(contains))
                                         .forEach(nameExpr -> {
                                             String className = nameExpr.getNameAsString();
-                                            nameExpr.setName(className.replace("Jakarta", "Javax"));
+                                            nameExpr.setName(className.replace(contains, replace));
                                         });
 
                                 n.getChildNodes().stream().filter(node -> node instanceof FieldAccessExpr)
@@ -284,28 +288,27 @@ public class ModifyEE9ToEE8
                                         .map(nameExpr -> (NameExpr)nameExpr.getScope())
                                         .forEach(nameExpr -> {
                                             String fullClassName = nameExpr.getNameAsString();
-                                            if(fullClassName.contains("Jakarta")) {
-                                                nameExpr.setName(fullClassName.replace("Jakarta", "Javax"));
+                                            if(fullClassName.contains(contains)) {
+                                                nameExpr.setName(fullClassName.replace(contains, replace));
                                             }
                                         });
 
                                 n.getChildNodes().stream().filter(node -> node instanceof NameExpr)
                                         .map(node -> (NameExpr)node)
-                                        .filter(nameExpr -> nameExpr.getNameAsString().contains("Jakarta"))
+                                        .filter(nameExpr -> nameExpr.getNameAsString().contains(contains))
                                         .forEach(nameExpr -> {
                                             String className = nameExpr.getNameAsString();
-                                            nameExpr.setName(className.replace("Jakarta", "Javax"));
+                                            nameExpr.setName(className.replace(contains, replace));
                                         });
 
                                 n.getChildNodes().stream().filter(node -> node instanceof ClassExpr)
                                         .map(node -> (ClassExpr)node)
-                                        .filter(classExpr -> classExpr.getTypeAsString().contains("Jakarta"))
+                                        .filter(classExpr -> classExpr.getTypeAsString().contains(contains))
                                         .forEach(classExpr -> {
                                             String className = classExpr.getTypeAsString();
-                                            classExpr.setType(className.replace("Jakarta", "Javax"));
+                                            classExpr.setType(className.replace(contains, replace));
                                         });
                             }
-                            return super.visit(n, arg);
                         }
 
                         @Override
