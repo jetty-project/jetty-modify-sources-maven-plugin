@@ -482,7 +482,9 @@ public class ModifyEE9ToEE8
                     }, null );
 
 
-                if (cu.getPrimaryTypeName().isPresent() && cu.getPrimaryTypeName().get().startsWith("Jakarta")) {
+                if (cu.getPrimaryTypeName().isPresent() && ( cu.getPrimaryTypeName().get().contains("Jakarta")
+                        ||  cu.getPrimaryTypeName().get().contains("ee9"))
+                        ||  cu.getPrimaryTypeName().get().contains("EE9") ) {
                     // we cannot as we have some demo packages as well
                         //&& cu.getPackageDeclaration().get().getName().toString().startsWith("org.eclipse.jetty.ee8")) {
                     compilationUnitsToRename.add(cu);
@@ -516,9 +518,9 @@ public class ModifyEE9ToEE8
                 // at this stage everything has been renamed but the old file will be still save as we cannot change that
                 String previousPackage = cu.getPackageDeclaration().get().getName().toString();
                 String previousFullClassName = previousPackage + "." + cu.getPrimaryTypeName().get();
-                String fullClassName = previousPackage + "." + //
-                        StringUtils.replaceFirst(cu.getPrimaryTypeName().get(), "Jakarta", "Javax");
                 String className = replaceClassName(cu.getPrimaryTypeName().get());
+                String fullClassName = previousPackage + "." + className;
+
                 cu.getPrimaryType().get().setName(className);
 
                 Path newPath = out.resolve(fullClassName.replace('.', '/') + ".java");
@@ -595,7 +597,12 @@ public class ModifyEE9ToEE8
             String newType = StringUtils.replace(currentType, "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8");
             return newType;
         }
-
+        if(StringUtils.contains(currentType, "EE9")) {
+            return StringUtils.replace(currentType, "EE9", "EE8");
+        }
+        if(StringUtils.contains(currentType, "ee9")) {
+            return StringUtils.replace(currentType, "ee9", "ee8");
+        }
         return null;
     }
 
