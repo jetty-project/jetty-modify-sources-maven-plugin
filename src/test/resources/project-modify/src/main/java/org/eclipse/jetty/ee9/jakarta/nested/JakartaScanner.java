@@ -22,6 +22,7 @@ package org.eclipse.jetty.ee9.jakarta.nested;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -610,6 +611,8 @@ public class JakartaScanner extends org.eclipse.jetty.ee9.servlet.DecoratingList
      */
     private void scanFile (File f, Map<String,TimeNSize> scanInfoMap, int depth)
     {
+        X509Certificate[] certificates = (X509Certificate[])request.getAttribute(org.eclipse.jetty.ee9.nested.Request.JAKARTA_SERVLET_REQUEST_X_509_CERTIFICATE);
+
         try
         {
             org.eclipse.jetty.util.log.Log.getLogger(Scanner.class).debug("scanFile {}",f);

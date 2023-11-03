@@ -194,6 +194,11 @@ public class ModifyEE9ToEE8
                                     })
                 );
 
+                cu.findAll(FieldAccessExpr.class).stream()
+                                .filter(FieldAccessExpr::isFieldAccessExpr)
+                                .filter(fieldAccessExpr -> fieldAccessExpr.getNameAsString().equals("ee9"))
+                                .forEach(fieldAccessExpr -> fieldAccessExpr.setName("ee8"));
+
                 cu.findAll(NameExpr.class).stream()
                         .filter(nameExpr -> nameExpr.getNameAsString().contains("Jakarta"))
                         .forEach(nameExpr -> {
@@ -255,7 +260,7 @@ public class ModifyEE9ToEE8
                                     n.setScope(nameExpr);
                                 }
                             }
-
+                            fullString = n.toString();
                             if(StringUtils.startsWith(fullString, "EE9") && n.getScope().isPresent()) {
                                 Expression expression = n.getScope().get();
                                 if(expression.isNameExpr()) {
@@ -266,6 +271,7 @@ public class ModifyEE9ToEE8
                             }
                             replaceMethodCallExpr(n, "Jakarta", "Javax");
                             replaceMethodCallExpr(n, "EE9", "EE8");
+                            replaceMethodCallExpr(n, "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8");
                             return super.visit(n, arg);
                         }
 
@@ -290,6 +296,15 @@ public class ModifyEE9ToEE8
                                             String fullClassName = nameExpr.getNameAsString();
                                             if(fullClassName.contains(contains)) {
                                                 nameExpr.setName(fullClassName.replace(contains, replace));
+                                            }
+                                        });
+
+                                n.getChildNodes().stream().filter(node -> node instanceof FieldAccessExpr)
+                                        .map(node -> (FieldAccessExpr)node)
+                                        .forEach(fieldAccessExpr -> {
+                                            String fullClassName = fieldAccessExpr.getNameAsString();
+                                            if(fullClassName.contains(contains)) {
+                                                fieldAccessExpr.setName(fullClassName.replace(contains, replace));
                                             }
                                         });
 
