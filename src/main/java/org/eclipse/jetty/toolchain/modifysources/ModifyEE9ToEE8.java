@@ -8,11 +8,12 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.JavadocComment;
+import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.CastExpr;
 import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.Expression;
@@ -22,6 +23,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.TextBlockLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.modules.ModuleDeclaration;
 import com.github.javaparser.ast.modules.ModuleExportsDirective;
@@ -32,6 +34,8 @@ import com.github.javaparser.ast.modules.ModuleUsesDirective;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.nodeTypes.NodeWithType;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
@@ -50,8 +54,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -104,6 +106,7 @@ public class ModifyEE9ToEE8
     @Parameter
     protected Set<String> notTranslateStartsWith = Set.of("https://jakarta.ee/xml/ns/", "http://jakarta.ee/xml/ns/");
 
+    private static final ThreadLocal<Boolean> TRANSLATE = ThreadLocal.withInitial(() -> true);
 
     public void execute()
         throws MojoExecutionException
@@ -228,8 +231,6 @@ public class ModifyEE9ToEE8
                             return super.visit(n, arg);
                         }
 
-
-
                         @Override
                         public Visitable visit(VariableDeclarationExpr n, Void arg) {
                             List <VariableDeclarator> variables = n.getVariables();
@@ -238,7 +239,6 @@ public class ModifyEE9ToEE8
                             }
                             return super.visit(n, arg);
                         }
-
 
                         @Override
                         public Visitable visit(MethodCallExpr n, Void arg) {
@@ -333,11 +333,6 @@ public class ModifyEE9ToEE8
                         }
 
                         @Override
-                        public Visitable visit(ClassOrInterfaceDeclaration n, Void arg) {
-                            return super.visit(n, arg);
-                        }
-
-                        @Override
                         public Visitable visit(ClassOrInterfaceType n, Void arg) {
                             String currentName = n.toString();
                             JavaParser javaParser = new JavaParser();
@@ -368,7 +363,42 @@ public class ModifyEE9ToEE8
                         }
 
                         @Override
+                        public Visitable visit(LineComment n, Void arg) {
+                            return super.visit(n, arg);
+                        }
+                        @Override
+                        public Visitable visit(BlockStmt n, Void arg) {
+                            if(n.toString().contains("//EE9EE8-NO-TRANSLATE")){
+                                TRANSLATE.set(false);
+                            }
+                            Visitable visitable = super.visit(n, arg);
+                            if(n.toString().contains("//EE9EE8-NO-TRANSLATE")){
+                                TRANSLATE.set(true);
+                            }
+                            return visitable;
+                        }
+
+                        @Override
+                        public Visitable visit(BlockComment n, Void arg) {
+                            return super.visit(n, arg);
+                        }
+
+                        @Override
+                        public Visitable visit(TextBlockLiteralExpr n, Void arg) {
+                            return super.visit(n, arg);
+                        }
+
+                        @Override
+                        public Visitable visit(ExpressionStmt n, Void arg) {
+                            Visitable visitable = super.visit(n, arg);
+                            return visitable;
+                        }
+
+                        @Override
                         public Visitable visit(StringLiteralExpr n, Void arg) {
+                            if(!TRANSLATE.get()) {
+                                return super.visit(n, arg);
+                            }
                             if (startsWith(n.getValue(), notTranslateStartsWith)) {
                                 return super.visit(n, arg);
                             }
