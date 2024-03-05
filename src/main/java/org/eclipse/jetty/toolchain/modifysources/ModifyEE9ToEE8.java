@@ -272,6 +272,9 @@ public class ModifyEE9ToEE8
                             replaceMethodCallExpr(n, "Jakarta", "Javax");
                             replaceMethodCallExpr(n, "EE9", "EE8");
                             replaceMethodCallExpr(n, "org.eclipse.jetty.ee9", "org.eclipse.jetty.ee8");
+                            if(n.getComment().isPresent() && n.getComment().get().getContent().contains("//EE8EE9-TRANSLATE")) {
+                                getLog().debug("//EE8EE9-TRANSLATE");
+                            }
                             return super.visit(n, arg);
                         }
 
@@ -375,6 +378,9 @@ public class ModifyEE9ToEE8
                             if(n.toString().contains("//EE9EE8-NO-TRANSLATE")){
                                 TRANSLATE.set(true);
                             }
+                            if(n.toString().contains("//EE8EE9-TRANSLATE")) {
+                                getLog().debug("found //EE8EE9-TRANSLATE");
+                            }
                             return visitable;
                         }
 
@@ -395,12 +401,34 @@ public class ModifyEE9ToEE8
                         }
 
                         @Override
+                        public Visitable visit(FieldDeclaration n, Void arg) {
+                            if(n.getComment().isPresent() && n.getComment().get().getContent().contains("EE8EE9-TRANSLATE")) {
+                                getLog().debug("found EE8EE9-TRANSLATE");
+                                TRANSLATE.set(false);
+                                n.getChildNodes().stream().filter(node -> node instanceof VariableDeclarator)
+                                        .map(node -> (VariableDeclarator)node)
+                                        .forEach(vd -> vd.getChildNodes().stream()
+                                                .filter(node -> node instanceof StringLiteralExpr)
+                                                .map((node -> (StringLiteralExpr)node))
+                                                .forEach(ste -> ste.setString(StringUtils.replace(ste.getValue(), "javax.", "jakarta."))));
+
+
+                            }
+                            Visitable visitable = super.visit(n, arg);
+                            TRANSLATE.set(true);
+                            return visitable;
+                        }
+
+                        @Override
                         public Visitable visit(StringLiteralExpr n, Void arg) {
                             if(!TRANSLATE.get()) {
                                 return super.visit(n, arg);
                             }
                             if (startsWith(n.getValue(), notTranslateStartsWith)) {
                                 return super.visit(n, arg);
+                            }
+                            if(StringUtils.contains(n.getValue(), "javax.servlet")) {
+                                getLog().debug("found javax.servlet");
                             }
                             if(StringUtils.contains(n.getValue(), "jakarta")) {
                                 n.setString(StringUtils.replace(n.getValue(), "jakarta", "javax"));
