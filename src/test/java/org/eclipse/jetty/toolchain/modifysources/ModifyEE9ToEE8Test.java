@@ -157,8 +157,8 @@ public class ModifyEE9ToEE8Test
             String sourceModified = new String(Files.readAllBytes(modified));
             assertThat(sourceModified, containsString("package org.eclipse.jetty.ee8"));
             assertThat(sourceModified, containsString("class CrossContextDispatcher"));
-            assertThat(sourceModified, containsString("name = \"jakarta.servlet.\" + name.substring(14);"));
-            assertThat(sourceModified, not(containsString("name = \"javax.servlet.\" + name.substring(14);")));
+            assertThat(sourceModified, containsString("private static final String ORIGIN_SERVLET_PACKAGE = \"jakarta.servlet.\";"));
+            assertThat(sourceModified, containsString("name = \"javax.servlet.\" + name.substring(ORIGIN_SERVLET_PACKAGE.length());"));
         }
     }
 
