@@ -457,6 +457,9 @@ public class ModifyEE9ToEE8
                             if(StringUtils.contains(n.getValue(), "webdefault-ee9.xml")) {
                                 n.setString(StringUtils.replace(n.getValue(), "webdefault-ee9.xml", "webdefault-ee8.xml"));
                             }
+                            if(StringUtils.contains(n.getValue(), "servlet5")) {
+                                n.setString(StringUtils.replace(n.getValue(), "servlet5", "servlet4"));
+                            }
 
                             return super.visit(n, arg);
                         }
