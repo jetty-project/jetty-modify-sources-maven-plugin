@@ -1,7 +1,7 @@
 #!groovy
 
 pipeline {
-  agent any
+  agent none
   options {
     disableConcurrentBuilds()
     durabilityHint('PERFORMANCE_OPTIMIZED')
@@ -12,7 +12,7 @@ pipeline {
     stage( "Parallel Stage" ) {
       parallel {
         stage( "Build / Test - JDK11" ) {
-          agent { node { label 'linux' } }
+          agent { node { label 'linux-light' } }
           options { timeout( time: 120, unit: 'MINUTES' ) }
           steps {
             mavenBuild( "jdk11", "clean install javadoc:jar" )
@@ -25,10 +25,17 @@ pipeline {
           }
         }
         stage( "Build / Test - JDK17" ) {
-          agent { node { label 'linux' } }
+          agent { node { label 'linux-light' } }
           options { timeout( time: 120, unit: 'MINUTES' ) }
           steps {
             mavenBuild( "jdk17", "clean install javadoc:jar" )
+          }
+        }
+        stage( "Build / Test - JDK21" ) {
+          agent { node { label 'linux-light' } }
+          options { timeout( time: 120, unit: 'MINUTES' ) }
+          steps {
+            mavenBuild( "jdk21", "clean install javadoc:jar" )
           }
         }
       }
