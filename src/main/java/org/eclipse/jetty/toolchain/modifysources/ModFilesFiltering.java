@@ -83,7 +83,7 @@ public class ModFilesFiltering extends DefaultMavenResourcesFiltering implements
                                 return dependencyToJarName(dependency.get());
                             }
                             dependency = findDependency(groupId, artifactId, mavenProject.getDependencyManagement().getDependencies());
-                            return dependencyToJarName(dependency.orElseThrow(() -> new NullPointerException("cannot find dependency " + groupId + ":" + artifactId)));
+                            return dependencyToJarName(dependency.orElseThrow(() -> new NullPointerException("cannot find dependency " + groupId + ":" + artifactId + " for file " + from)));
                         }
                         return mavenProject.getProperties().getProperty(s);
                     };
