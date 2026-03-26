@@ -721,4 +721,20 @@ public class ModifyEE9ToEE8
     protected void setMoveDirectoryStructure(boolean moveDirectoryStructure) {
         this.moveDirectoryStructure = moveDirectoryStructure;
     }
+
+    public File getSourceProjectLocation() {
+        return sourceProjectLocation;
+    }
+
+    public File getOutputDirectory() {
+        return outputDirectory;
+    }
+
+    public boolean isSkip() {
+        return skip;
+    }
+
+    public boolean isMoveDirectoryStructure() {
+        return moveDirectoryStructure;
+    }
 }
