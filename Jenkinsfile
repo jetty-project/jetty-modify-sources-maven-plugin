@@ -15,11 +15,11 @@ pipeline {
           agent { node { label 'linux-light' } }
           options { timeout( time: 120, unit: 'MINUTES' ) }
           steps {
-            mavenBuild( "jdk11", "clean install javadoc:jar" )
+            mavenBuild( "jdk17", "clean install javadoc:jar" )
             warnings consoleParsers: [[parserName: 'Maven'], [parserName: 'Java']]
             script {
               if (env.BRANCH_NAME == 'main') {
-                mavenBuild( "jdk11", "deploy" )
+                mavenBuild( "jdk17", "deploy" )
               }
             }
           }
@@ -28,14 +28,14 @@ pipeline {
           agent { node { label 'linux-light' } }
           options { timeout( time: 120, unit: 'MINUTES' ) }
           steps {
-            mavenBuild( "jdk17", "clean install javadoc:jar" )
+            mavenBuild( "jdk21", "clean install javadoc:jar" )
           }
         }
         stage( "Build / Test - JDK25" ) {
           agent { node { label 'linux-light' } }
           options { timeout( time: 120, unit: 'MINUTES' ) }
           steps {
-            mavenBuild( "jdk21", "clean install javadoc:jar" )
+            mavenBuild( "jdk25", "clean install javadoc:jar" )
           }
         }
       }
