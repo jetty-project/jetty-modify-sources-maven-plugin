@@ -1,0 +1,6 @@
+File result = new File(basedir, "target/test-classes/test.mod")
+assert result.isFile()
+assert result.text.contains('commons-io-2.20.0.jar')
+assert result.text.contains('hello-world')
+assert !result.text.contains('@commons-io:commons-io@')
+assert !result.text.contains('@test.property@')

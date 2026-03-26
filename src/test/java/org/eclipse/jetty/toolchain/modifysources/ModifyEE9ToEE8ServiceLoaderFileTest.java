@@ -13,10 +13,9 @@
 
 package org.eclipse.jetty.toolchain.modifysources;
 
-
-import org.apache.maven.plugin.testing.MojoRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.apache.maven.api.plugin.testing.InjectMojo;
+import org.apache.maven.api.plugin.testing.MojoTest;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -31,42 +30,26 @@ import static org.hamcrest.io.FileMatchers.anExistingFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
+@MojoTest(realRepositorySession = true)
+//@Basedir("/unit")
 public class ModifyEE9ToEE8ServiceLoaderFileTest
 {
-    @Rule
-    public MojoRule rule = new MojoRule()
-    {
-        @Override
-        protected void before()
-            throws Throwable
-        {
-//            FileUtils.copyDirectory(new File("src/test/resources/project-modify/"),
-//                    new File());
-        }
-
-        @Override
-        protected void after()
-        {
-        }
-    };
-
 
     @Test
-    public void testChangeToEE8()
+    @InjectMojo(goal = "modify-service-loader-files-ee9-to-ee8")
+    public void testChangeToEE8(ModifyEE9ToEE8ServiceLoaderFiles mojo)
         throws Exception
     {
 
         File pom = new File( "target/test-classes/project-modify/" );
         assertThat(pom, notNullValue());
 
-        ModifyEE9ToEE8ServiceLoaderFiles mojo =
-            (ModifyEE9ToEE8ServiceLoaderFiles) rule.lookupConfiguredMojo( pom, "modify-service-loader-files-ee9-to-ee8" );
         assertThat(mojo, notNullValue());
         mojo.setOutputDirectory(new File("target/test-classes/project-modify/src/main/resources"));
 
         mojo.execute();
 
-        File outputDirectory = (File) rule.getVariableValueFromObject( mojo, "outputDirectory" );
+        File outputDirectory = mojo.getOutputDirectory();
         assertThat(outputDirectory, notNullValue());
         assertThat(outputDirectory, anExistingDirectory());
 

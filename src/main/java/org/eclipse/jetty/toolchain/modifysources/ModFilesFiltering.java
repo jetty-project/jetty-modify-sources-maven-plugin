@@ -13,11 +13,11 @@
 
 package org.eclipse.jetty.toolchain.modifysources;
 
-import com.google.inject.Singleton;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.commons.text.lookup.StringLookup;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.filtering.ChangeDetection;
 import org.apache.maven.shared.filtering.DefaultMavenFileFilter;
 import org.apache.maven.shared.filtering.DefaultMavenResourcesFiltering;
 import org.apache.maven.shared.filtering.FilterWrapper;
@@ -31,6 +31,7 @@ import org.sonatype.plexus.build.incremental.BuildContext;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -75,7 +76,7 @@ public class ModFilesFiltering extends DefaultMavenResourcesFiltering implements
 
         @Override
         public void copyFile(File from, final File to, boolean filtering, List<FilterWrapper> filterWrappers,
-                             String encoding, boolean overwrite )
+                             String encoding, ChangeDetection changeDetection)
                 throws MavenFilteringException {
 
             MavenProject mavenProject = CURRENT_PROJECT.get();

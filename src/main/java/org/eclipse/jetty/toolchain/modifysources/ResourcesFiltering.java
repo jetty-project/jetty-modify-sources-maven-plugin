@@ -14,11 +14,14 @@
 package org.eclipse.jetty.toolchain.modifysources;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.shared.filtering.ChangeDetection;
 import org.apache.maven.shared.filtering.DefaultMavenFileFilter;
 import org.apache.maven.shared.filtering.DefaultMavenResourcesFiltering;
 import org.apache.maven.shared.filtering.FilterWrapper;
 import org.apache.maven.shared.filtering.MavenFileFilter;
+import org.apache.maven.shared.filtering.MavenFileFilterRequest;
 import org.apache.maven.shared.filtering.MavenFilteringException;
+import org.apache.maven.shared.filtering.MavenResourcesExecution;
 import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,11 +48,14 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
         return Collections.emptyList();
     }
 
+    private JettyMavenFileFilter jettyMavenFileFilter;
+
     @Inject
     public ResourcesFiltering(MavenFileFilter mavenFileFilter, BuildContext buildContext) {
         super(new JettyMavenFileFilter(buildContext), buildContext);
+        this.jettyMavenFileFilter = new JettyMavenFileFilter(buildContext);
     }
-
+    
     public static class JettyMavenFileFilter extends DefaultMavenFileFilter implements MavenFileFilter {
 
         private BuildContext buildContext;
@@ -62,7 +68,7 @@ public class ResourcesFiltering extends DefaultMavenResourcesFiltering implement
 
         @Override
         public void copyFile(File from, final File to, boolean filtering, List<FilterWrapper> filterWrappers,
-                             String encoding, boolean overwrite )
+                             String encoding, ChangeDetection changeDetection)
                 throws MavenFilteringException {
             try {
                 // not looking at non filtered files

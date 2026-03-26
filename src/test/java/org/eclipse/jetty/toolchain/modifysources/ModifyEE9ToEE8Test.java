@@ -13,10 +13,9 @@
 
 package org.eclipse.jetty.toolchain.modifysources;
 
-
-import org.apache.maven.plugin.testing.MojoRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.apache.maven.api.plugin.testing.InjectMojo;
+import org.apache.maven.api.plugin.testing.MojoTest;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -31,42 +30,28 @@ import static org.hamcrest.io.FileMatchers.anExistingFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
+@MojoTest(realRepositorySession = true)
+//@Basedir("/unit")
 public class ModifyEE9ToEE8Test
 {
-    @Rule
-    public MojoRule rule = new MojoRule()
-    {
-        @Override
-        protected void before()
-            throws Throwable
-        {
-//            FileUtils.copyDirectory(new File("src/test/resources/project-modify/"),
-//                    new File());
-        }
-
-        @Override
-        protected void after()
-        {
-        }
-    };
 
 
     @Test
-    public void testChangeToEE8()
+    @InjectMojo(goal = "modify-sources-ee9-to-ee8") //, pom = "basic-surefire-report-test/plugin-config.xml")
+    public void testChangeToEE8(ModifyEE9ToEE8 mojo)
         throws Exception
     {
 
         File pom = new File( "target/test-classes/project-modify/" );
         assertThat(pom, notNullValue());
 
-        ModifyEE9ToEE8 mojo =
-            (ModifyEE9ToEE8) rule.lookupConfiguredMojo( pom, "modify-sources-ee9-to-ee8" );
+        //ModifyEE9ToEE8 mojo = rule.lookupConfiguredMojo( pom, "modify-sources-ee9-to-ee8" );
         assertThat(mojo, notNullValue());
         mojo.setSourceProjectLocation(new File("target/test-classes/project-modify/src/main/java"));
         mojo.setMoveDirectoryStructure(true);
         mojo.execute();
 
-        File outputDirectory = (File) rule.getVariableValueFromObject( mojo, "outputDirectory" );
+        File outputDirectory = mojo.getOutputDirectory();
         assertThat(outputDirectory, notNullValue());
         assertThat(outputDirectory, anExistingDirectory());
 
@@ -148,21 +133,21 @@ public class ModifyEE9ToEE8Test
     }
 
     @Test
-    public void testChangeToEE8WithNoChangeComment()
+    @InjectMojo(goal = "modify-sources-ee9-to-ee8")
+    public void testChangeToEE8WithNoChangeComment(ModifyEE9ToEE8 mojo)
             throws Exception
     {
 
         File pom = new File( "target/test-classes/project-modify/" );
         assertThat(pom, notNullValue());
 
-        ModifyEE9ToEE8 mojo =
-                (ModifyEE9ToEE8) rule.lookupConfiguredMojo( pom, "modify-sources-ee9-to-ee8" );
+//        ModifyEE9ToEE8 mojo = rule.lookupConfiguredMojo( pom, "modify-sources-ee9-to-ee8" );
         assertThat(mojo, notNullValue());
         mojo.setSourceProjectLocation(new File("target/test-classes/project-modify/src/main/java"));
         mojo.setMoveDirectoryStructure(true);
         mojo.execute();
 
-        File outputDirectory = (File) rule.getVariableValueFromObject( mojo, "outputDirectory" );
+        File outputDirectory = mojo.getOutputDirectory();
 
         {
             Path modified = Paths.get(outputDirectory.toString(), "org", "eclipse", "jetty", "ee8", "CrossContextDispatcher.java");

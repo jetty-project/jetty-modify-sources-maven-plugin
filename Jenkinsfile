@@ -11,24 +11,17 @@ pipeline {
   stages {
     stage( "Parallel Stage" ) {
       parallel {
-        stage( "Build / Test - JDK11" ) {
-          agent { node { label 'linux-light' } }
-          options { timeout( time: 120, unit: 'MINUTES' ) }
-          steps {
-            mavenBuild( "jdk11", "clean install javadoc:jar" )
-            warnings consoleParsers: [[parserName: 'Maven'], [parserName: 'Java']]
-            script {
-              if (env.BRANCH_NAME == 'main') {
-                mavenBuild( "jdk11", "deploy" )
-              }
-            }
-          }
-        }
         stage( "Build / Test - JDK17" ) {
           agent { node { label 'linux-light' } }
           options { timeout( time: 120, unit: 'MINUTES' ) }
           steps {
             mavenBuild( "jdk17", "clean install javadoc:jar" )
+            warnings consoleParsers: [[parserName: 'Maven'], [parserName: 'Java']]
+            script {
+              if (env.BRANCH_NAME == 'main') {
+                mavenBuild( "jdk17", "deploy" )
+              }
+            }
           }
         }
         stage( "Build / Test - JDK21" ) {
@@ -36,6 +29,13 @@ pipeline {
           options { timeout( time: 120, unit: 'MINUTES' ) }
           steps {
             mavenBuild( "jdk21", "clean install javadoc:jar" )
+          }
+        }
+        stage( "Build / Test - JDK25" ) {
+          agent { node { label 'linux-light' } }
+          options { timeout( time: 120, unit: 'MINUTES' ) }
+          steps {
+            mavenBuild( "jdk25", "clean install javadoc:jar" )
           }
         }
       }

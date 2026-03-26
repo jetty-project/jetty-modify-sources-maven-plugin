@@ -106,4 +106,8 @@ public class ModifyEE9ToEE8ServiceLoaderFiles
     public void setOutputDirectory(File outputDirectory) {
         this.outputDirectory = outputDirectory;
     }
+
+    public File getOutputDirectory() {
+        return outputDirectory;
+    }
 }
