@@ -11,7 +11,7 @@ pipeline {
   stages {
     stage( "Parallel Stage" ) {
       parallel {
-        stage( "Build / Test - JDK11" ) {
+        stage( "Build / Test - JDK17" ) {
           agent { node { label 'linux-light' } }
           options { timeout( time: 120, unit: 'MINUTES' ) }
           steps {
@@ -24,14 +24,14 @@ pipeline {
             }
           }
         }
-        stage( "Build / Test - JDK17" ) {
+        stage( "Build / Test - JDK21" ) {
           agent { node { label 'linux-light' } }
           options { timeout( time: 120, unit: 'MINUTES' ) }
           steps {
             mavenBuild( "jdk17", "clean install javadoc:jar" )
           }
         }
-        stage( "Build / Test - JDK21" ) {
+        stage( "Build / Test - JDK25" ) {
           agent { node { label 'linux-light' } }
           options { timeout( time: 120, unit: 'MINUTES' ) }
           steps {
