@@ -13,7 +13,6 @@
 
 package org.eclipse.jetty.toolchain.modifysources;
 
-import com.google.inject.Singleton;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.commons.text.lookup.StringLookup;
 import org.apache.maven.model.Dependency;
@@ -32,6 +31,7 @@ import org.sonatype.plexus.build.incremental.BuildContext;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
