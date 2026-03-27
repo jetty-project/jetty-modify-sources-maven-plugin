@@ -40,11 +40,6 @@
         <version>3.5.0</version>
         <dependencies>
           <dependency>
-            <groupId>org.apache.maven.shared</groupId>
-            <artifactId>maven-filtering</artifactId>
-            <version>3.5.0</version>
-          </dependency>
-          <dependency>
             <groupId>@project.groupId@</groupId>
             <artifactId>@project.artifactId@</artifactId>
             <version>@project.version@</version>
