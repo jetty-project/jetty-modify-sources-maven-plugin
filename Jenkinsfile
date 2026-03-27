@@ -55,7 +55,7 @@ pipeline {
 def mavenBuild(jdk, cmdline) {
   def mvnName = 'maven3'
   def localRepo = "${env.JENKINS_HOME}/${env.EXECUTOR_NUMBER}" // ".repository" //
-  def settingsName = 'oss-settings.xml'
+  def settingsName = 'oss-deploy'
   def mavenOpts = '-Xms2g -Xmx2g -Djava.awt.headless=true'
 
   withMaven(
@@ -67,7 +67,7 @@ def mavenBuild(jdk, cmdline) {
           mavenOpts: mavenOpts,
           mavenLocalRepo: localRepo) {
     // Some common Maven command line + provided command line
-    sh "mvn -V -B -DfailIfNoTests=false -Djetty.testtracker.log=true -e $cmdline"
+    sh "mvn -V -B -e $cmdline"
   }
 }
 
