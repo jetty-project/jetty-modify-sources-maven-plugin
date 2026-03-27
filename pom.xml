@@ -10,7 +10,7 @@
 
   <groupId>org.eclipse.jetty.toolchain</groupId>
   <artifactId>jetty-modify-sources-maven-plugin</artifactId>
-  <version>1.0.14</version>
+  <version>1.0.15-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>jetty-modify-sources-maven-plugin Maven Plugin</name>
@@ -51,7 +51,7 @@
   <scm>
     <connection>scm:git:https://github.com/jetty-project/${project.artifactId}.git</connection>
     <developerConnection>scm:git:https://github.com/jetty-project/${project.artifactId}.git</developerConnection>
-    <tag>jetty-modify-sources-maven-plugin-1.0.14</tag>
+    <tag>HEAD</tag>
     <url>https://github.com/jetty-project/${project.artifactId}</url>
   </scm>
 
