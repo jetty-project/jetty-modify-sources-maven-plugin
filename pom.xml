@@ -54,10 +54,24 @@
     <tag>HEAD</tag>
     <url>https://github.com/jetty-project/${project.artifactId}</url>
   </scm>
+
   <issueManagement>
     <system>github</system>
     <url>https://github.com/jetty-project/${project.artifactId}/issues</url>
   </issueManagement>
+
+  <distributionManagement>
+    <repository>
+      <id>sonatype-cp</id>
+      <name>Central Portal</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+    </repository>
+    <snapshotRepository>
+      <id>sonatype-cp</id>
+      <name>Central Portal</name>
+      <url>https://central.sonatype.com/repository/maven-snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <properties>
     <javaparser.version>3.26.4</javaparser.version>
