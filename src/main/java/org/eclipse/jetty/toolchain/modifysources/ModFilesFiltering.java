@@ -13,6 +13,19 @@
 
 package org.eclipse.jetty.toolchain.modifysources;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.commons.text.lookup.StringLookup;
 import org.apache.maven.model.Dependency;
@@ -28,17 +41,6 @@ import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonatype.plexus.build.incremental.BuildContext;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 @Singleton
 @Named("mod-files")
@@ -66,6 +68,9 @@ public class ModFilesFiltering extends DefaultMavenResourcesFiltering implements
 
     public static class JettyModFilesFileFilter extends DefaultMavenFileFilter implements MavenFileFilter {
 
+        // matches a selector function such as "version(groupId:artifactId)"
+        private static final Pattern SELECTOR_FUNCTION = Pattern.compile("(\\w+)\\(([^)]+)\\)");
+
         private BuildContext buildContext;
 
         @Inject
@@ -87,17 +92,30 @@ public class ModFilesFiltering extends DefaultMavenResourcesFiltering implements
                     // well it is definitely not the best option to read the full content but shouldn't be too big files
                     String content = Files.readString(from.toPath());
                     StringLookup stringLookup = s -> {
-                        if(s.contains(":")) {
-                            // we have groupId:artifactId so let's get the version
+                        Matcher selectorMatcher = SELECTOR_FUNCTION.matcher(s);
+                        if (selectorMatcher.matches())
+                        {
+                            // we have a selector function such as version(groupId:artifactId)
+                            String selector = selectorMatcher.group(1);
+                            String[] parts = selectorMatcher.group(2).split(":");
+                            String groupId = parts[0];
+                            String artifactId = parts[1];
+                            Dependency dependency = resolveDependency(groupId, artifactId, mavenProject, from);
+                            return switch (selector)
+                            {
+                                case "version" -> dependency.getVersion();
+                                case "jar" -> dependencyToJarName(dependency);
+                                default ->
+                                    throw new IllegalArgumentException("unknown selector '" + selector + "' in @" + s + "@ for file " + from);
+                            };
+                        }
+                        if (s.contains(":"))
+                        {
+                            // we have groupId:artifactId so let's get the jar name
                             String[] parts = s.split(":");
                             String groupId = parts[0];
                             String artifactId = parts[1];
-                            Optional<Dependency> dependency = findDependency(groupId, artifactId, mavenProject.getDependencies());
-                            if (dependency.isPresent()) {
-                                return dependencyToJarName(dependency.get());
-                            }
-                            dependency = findDependency(groupId, artifactId, mavenProject.getDependencyManagement().getDependencies());
-                            return dependencyToJarName(dependency.orElseThrow(() -> new NullPointerException("cannot find dependency " + groupId + ":" + artifactId + " for file " + from)));
+                            return dependencyToJarName(resolveDependency(groupId, artifactId, mavenProject, from));
                         }
                         return mavenProject.getProperties().getProperty(s);
                     };
@@ -111,6 +129,17 @@ public class ModFilesFiltering extends DefaultMavenResourcesFiltering implements
             }
         }
 
+    }
+
+    private static Dependency resolveDependency(String groupId, String artifactId, MavenProject mavenProject, File from)
+    {
+        Optional<Dependency> dependency = findDependency(groupId, artifactId, mavenProject.getDependencies());
+        if (dependency.isPresent())
+        {
+            return dependency.get();
+        }
+        dependency = findDependency(groupId, artifactId, mavenProject.getDependencyManagement().getDependencies());
+        return dependency.orElseThrow(() -> new NullPointerException("cannot find dependency " + groupId + ":" + artifactId + " for file " + from));
     }
 
     private static Optional<Dependency> findDependency(String groupId, String artifactId, List<Dependency> dependencies) {
