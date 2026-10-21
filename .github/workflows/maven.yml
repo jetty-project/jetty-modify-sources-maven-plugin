@@ -28,4 +28,4 @@ jobs:
     name: Maven Build CI
     uses: jetty-project/.github/.github/workflows/maven-ci.yml@master
     with:
-      jdk-matrix: '[  "17", "21", "25 ]'
+      jdk-matrix: '[ "17", "21", "25" ]'
