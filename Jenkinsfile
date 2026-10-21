@@ -16,7 +16,6 @@ pipeline {
           options { timeout( time: 120, unit: 'MINUTES' ) }
           steps {
             mavenBuild( "jdk17", "clean install javadoc:jar" )
-            warnings consoleParsers: [[parserName: 'Maven'], [parserName: 'Java']]
             script {
               if (env.BRANCH_NAME == 'main') {
                 mavenBuild( "jdk17", "deploy" )
