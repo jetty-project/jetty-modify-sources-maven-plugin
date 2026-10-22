@@ -76,7 +76,7 @@
   <properties>
     <javaparser.version>3.26.4</javaparser.version>
     <jdk.version.minimum>17</jdk.version.minimum>
-    <maven.version>3.9.14</maven.version>
+    <maven.version>3.10.0</maven.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
